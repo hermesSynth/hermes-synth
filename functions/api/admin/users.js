@@ -10,7 +10,7 @@ export async function onRequestGet(context) {
   // Check if admin (first registered user or specific email)
   const db = context.env.DB;
   const user = await db.prepare('SELECT email FROM users WHERE id = ?').bind(payload.userId).first();
-  const adminEmails = ['tezaa06@gmail.com', 'agentshop212@gmail.com'];
+  const adminEmails = ['admin@hermessynth.org'];
   if (!user || !adminEmails.includes(user.email.toLowerCase())) {
     return Response.json({ error: 'Admin access required' }, { status: 403 });
   }

@@ -9,12 +9,8 @@ description: Test the Hermes Synth platform end-to-end. Use when verifying UI, a
 - https://hermessynth.org (Cloudflare Pages + Functions)
 
 ## Devin Secrets Needed
-- None required — test credentials are public test accounts
-
-## Test Account
-- Email: `tezaa06@gmail.com`
-- Password: `hermes123`
-- Tier: `free_trial`
+- Admin email must be configured in the Cloudflare D1 database
+- No hardcoded test accounts — register via /register page
 
 ## Architecture
 - **Frontend**: Static HTML files in `public/` deployed via Cloudflare Pages
@@ -91,7 +87,7 @@ description: Test the Hermes Synth platform end-to-end. Use when verifying UI, a
 
 1. **Verify site accessible**: `curl -s -o /dev/null -w "%{http_code}" https://hermessynth.org/` → expect 200
 2. **Test auth redirect**: `curl -s -o /dev/null -w "%{http_code}" https://hermessynth.org/chat` → expect 302
-3. **Login via browser**: Navigate to /login, enter test credentials (tezaa06@gmail.com / hermes123)
+3. **Login via browser**: Navigate to /login, register a new account or use configured credentials
 4. **Verify bottom nav**: Check for Profile link (not MCP) on /chat page
 5. **Test Settings AI Preferences**: Navigate to /settings, scroll to AI PREFERENCES, change default model
 6. **Verify Settings→Chat integration**: After changing model in settings, go to /chat and verify dropdown
