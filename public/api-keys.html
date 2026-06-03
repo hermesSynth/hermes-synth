@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Keys — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #ffffff; color: #0f172a; min-height: 100vh; }
+    .page { padding: 0 0 80px 0; }
+    .topbar { display: flex; align-items: center; justify-content: space-between; padding: 16px 24px; }
+    .topbar .badge { background: #fff; border: 1px solid rgba(0,51,255,0.3); color: #0033ff; font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; padding: 6px 16px; border-radius: 4px; display: flex; align-items: center; gap: 8px; }
+    .topbar .badge img { width: 20px; height: 20px; }
+    .topbar .menu-btn { background: #fff; border: 1px solid rgba(0,51,255,0.1); color: #0f172a; width: 40px; height: 40px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; text-decoration: none; }
+    .hero { padding: 8px 24px 20px; }
+    .hero h1 { font-size: 32px; font-weight: 400; color: #0f172a; }
+    .hero h1 span { color: #0033ff; }
+    .hero p { font-size: 13px; color: rgba(15,23,42,0.5); margin-top: 8px; }
+
+    .content { padding: 0 24px; }
+    .section-title { font-size: 13px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+    .card { background: #fff; border: 1px solid rgba(0,51,255,0.08); border-radius: 12px; padding: 24px; box-shadow: 0 2px 12px rgba(0,51,255,0.06); margin-bottom: 16px; }
+    .field { margin-bottom: 16px; }
+    .field label { display: block; font-size: 11px; color: #475569; margin-bottom: 6px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; }
+    .field select, .field input { width: 100%; background: #f8fafc; border: 1px solid rgba(0,51,255,0.12); border-radius: 8px; padding: 12px 14px; font-size: 13px; color: #0f172a; outline: none; font-family: 'JetBrains Mono', monospace; }
+    .field input:focus, .field select:focus { border-color: rgba(0,51,255,0.5); }
+
+    .btn { background: #0033ff; color: #fff; border: none; border-radius: 8px; padding: 12px 24px; font-size: 13px; font-weight: 700; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+    .btn:hover { background: #0022cc; }
+    .btn-sm { padding: 8px 14px; font-size: 11px; }
+    .btn-danger { background: #ef4444; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .msg { font-size: 12px; margin-top: 8px; display: none; }
+    .msg.success { color: #22c55e; }
+    .msg.error { color: #ef4444; }
+
+    .key-list { display: flex; flex-direction: column; gap: 12px; }
+    .key-card { background: #fff; border: 1px solid rgba(0,51,255,0.08); border-radius: 12px; padding: 16px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,51,255,0.04); }
+    .key-info { flex: 1; }
+    .key-provider { font-size: 14px; font-weight: 700; color: #0f172a; margin-bottom: 4px; text-transform: capitalize; }
+    .key-masked { font-size: 12px; color: #64748b; font-family: monospace; }
+    .key-date { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+    .key-actions { display: flex; gap: 8px; }
+
+    .empty { text-align: center; padding: 40px 20px; color: #94a3b8; font-size: 13px; }
+    .empty-icon { font-size: 40px; margin-bottom: 12px; }
+
+    .provider-info { font-size: 11px; color: #94a3b8; margin-top: 4px; }
+
+    .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; background: #fff; border-top: 1px solid rgba(0,51,255,0.1); display: flex; justify-content: space-around; padding: 10px 0; z-index: 100; }
+    .bottom-nav a { color: #94a3b8; text-decoration: none; font-size: 10px; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+    .bottom-nav a.active { color: #0033ff; }
+    .bottom-nav svg { width: 22px; height: 22px; }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="badge"><img src="/logo.png?v=4" alt="">HERMES SYNTH</div>
+      <a href="/settings" class="menu-btn">⚙</a>
+    </div>
+
+    <div class="hero">
+      <h1>API <span>Keys</span></h1>
+      <p>manage your AI provider keys</p>
+    </div>
+
+    <div class="content">
+      <div class="section-title">Add New Key</div>
+      <div class="card">
+        <div class="field">
+          <label>Provider</label>
+          <select id="provider">
+            <option value="venice">Venice AI (default)</option>
+            <option value="openai">OpenAI</option>
+            <option value="anthropic">Anthropic</option>
+            <option value="groq">Groq</option>
+            <option value="openrouter">OpenRouter</option>
+            <option value="together">Together AI</option>
+          </select>
+          <p class="provider-info" id="providerInfo">Free tier uses Venice AI. Add your own key for unlimited usage.</p>
+        </div>
+        <div class="field">
+          <label>API Key</label>
+          <input type="password" id="apiKey" placeholder="sk-...">
+        </div>
+        <div id="addMsg" class="msg"></div>
+        <button class="btn" onclick="addKey()">Add Key</button>
+      </div>
+
+      <div class="section-title" style="margin-top: 24px;">Your Keys</div>
+      <div id="keyList" class="key-list">
+        <div class="empty">
+          <div class="empty-icon">🔑</div>
+          Loading...
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="/chat"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <a href="/agents"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 1v4m0 14v4M4.22 4.22l2.83 2.83m9.9 9.9l2.83 2.83M1 12h4m14 0h4M4.22 19.78l2.83-2.83m9.9-9.9l2.83-2.83"/></svg>Agents</a>
+    <a href="/profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+    <a href="/settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>Settings</a>
+  </nav>
+
+  <script>
+    const providerSelect = document.getElementById('provider');
+    const providerInfo = document.getElementById('providerInfo');
+    const infoMap = {
+      venice: 'Free tier uses Venice AI. Add your own key for unlimited usage.',
+      openai: 'Get your key at platform.openai.com/api-keys',
+      anthropic: 'Get your key at console.anthropic.com/settings/keys',
+      groq: 'Get your key at console.groq.com/keys',
+      openrouter: 'Get your key at openrouter.ai/keys',
+      together: 'Get your key at api.together.xyz/settings/api-keys',
+    };
+    providerSelect.addEventListener('change', () => {
+      providerInfo.textContent = infoMap[providerSelect.value] || '';
+    });
+
+    async function loadKeys() {
+      try {
+        const res = await fetch('/api/keys');
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const keys = await res.json();
+        const list = document.getElementById('keyList');
+        if (!keys.length) {
+          list.innerHTML = '<div class="empty"><div class="empty-icon">🔑</div>No API keys added yet.<br>Add a key above to get started.</div>';
+          return;
+        }
+        list.innerHTML = keys.map(k => `
+          <div class="key-card">
+            <div class="key-info">
+              <div class="key-provider">${k.provider}</div>
+              <div class="key-masked">${k.masked_key}</div>
+              <div class="key-date">Added ${new Date(k.created_at).toLocaleDateString()}</div>
+            </div>
+            <div class="key-actions">
+              <button class="btn btn-sm btn-danger" onclick="deleteKey('${k.id}')">Delete</button>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) {
+        document.getElementById('keyList').innerHTML = '<div class="empty">Failed to load keys</div>';
+      }
+    }
+
+    async function addKey() {
+      const msg = document.getElementById('addMsg');
+      const provider = document.getElementById('provider').value;
+      const key = document.getElementById('apiKey').value;
+      if (!key) {
+        msg.textContent = 'Please enter an API key';
+        msg.className = 'msg error';
+        msg.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/keys', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ provider, key }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = 'Key added successfully!';
+          msg.className = 'msg success';
+          document.getElementById('apiKey').value = '';
+          loadKeys();
+        } else {
+          msg.textContent = data.error || 'Failed to add key';
+          msg.className = 'msg error';
+        }
+      } catch {
+        msg.textContent = 'Network error';
+        msg.className = 'msg error';
+      }
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+
+    async function deleteKey(id) {
+      if (!confirm('Delete this API key?')) return;
+      await fetch(`/api/keys?id=${id}`, { method: 'DELETE' });
+      loadKeys();
+    }
+
+    loadKeys();
+  </script>
+</body>
+</html>

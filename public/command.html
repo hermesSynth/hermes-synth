@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Command — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .page { position: relative; z-index: 1; padding: 0 0 80px 0; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    .topbar .badge {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.3);
+      color: #0033ff;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .topbar .badge img { width: 20px; height: 20px; }
+    .topbar .menu-btn {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a;
+      width: 40px; height: 40px; border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; text-decoration: none;
+    }
+    .hero { padding: 8px 24px 20px; }
+    .hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px; font-weight: 400; line-height: 1.15; color: #0f172a;
+    }
+    .hero h1 span { color: #0033ff; }
+    .hero p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: rgba(15,23,42,0.5); margin-top: 8px;
+    }
+    .card {
+      margin: 0 24px 16px;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      background: #ffffff;
+    }
+    .card h3 {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(15,23,42,0.5); margin-bottom: 16px;
+    }
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(15,23,42,0.5); margin-bottom: 10px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      color: #0f172a; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(0,51,255,0.5); }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(15,23,42,0.3); }
+    .field select option { background: #ffffff; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: #0033ff;
+      color: #ffffff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .btn-secondary:hover { border-color: rgba(0,51,255,0.3); }
+    .btn-danger {
+      padding: 10px 20px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .item-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      border-radius: 8px; padding: 16px;
+      margin-bottom: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .item-card:hover { border-color: rgba(0,51,255,0.3); background: rgba(0,51,255,0.05); }
+    .item-card .name { font-size: 14px; font-weight: 600; color: #0f172a; }
+    .item-card .desc { font-size: 12px; color: rgba(15,23,42,0.5); margin-top: 4px; }
+    .item-card .meta { font-size: 10px; color: rgba(15,23,42,0.4); margin-top: 8px; display: flex; gap: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-sm {
+      font-size: 9px; padding: 2px 8px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .badge-sm.active { background: rgba(52,211,153,0.15); color: #34d399; }
+    .badge-sm.paused { background: #ffffff; color: #0033ff; }
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: rgba(15,23,42,0.4);
+    }
+    .empty-state h3 { font-size: 16px; color: rgba(15,23,42,0.5); margin-bottom: 8px; font-family: Georgia, serif; }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-family: Georgia, serif; font-size: 20px; margin-bottom: 20px; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff;
+      border-top: 1px solid rgba(0,51,255,0.08);
+      display: flex; justify-content: space-around;
+      padding: 10px 0 14px; z-index: 10;
+    }
+    .bottom-nav a {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      text-decoration: none; color: rgba(15,23,42,0.4);
+      font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      transition: color 0.2s;
+    }
+    .bottom-nav a:hover, .bottom-nav a.active { color: #0033ff; }
+    .bottom-nav img { width: 22px; height: 22px; }
+    @media (max-width: 480px) {
+      .hero { padding: 8px 12px 12px; }
+      .hero h1 { font-size: 22px; }
+      .hero p { font-size: 12px; }
+      .chat-card { margin: 0 8px; }
+      .input-area { padding: 8px 10px; }
+    }
+    @media (min-width: 768px) {
+      .page { max-width: 700px; margin: 0 auto; }
+      .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); border-radius: 12px 12px 0 0; }
+    }
+
+    .status-bar {
+      display: flex; gap: 16px; margin: 0 24px 16px; font-size: 11px;
+      color: rgba(15,23,42,0.5); letter-spacing: 1px; text-transform: uppercase;
+    }
+    .dot { width: 6px; height: 6px; border-radius: 50%; display: inline-block; margin-right: 4px; }
+    .dot.green { background: #34d399; }
+    .dot.yellow { background: #0033ff; }
+    .cmd-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 0 24px 16px; }
+    .cmd-btn {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.1);
+      border-radius: 8px; padding: 12px; cursor: pointer; transition: all 0.2s;
+      text-align: left;
+    }
+    .cmd-btn:hover { border-color: rgba(0,51,255,0.3); background: rgba(0,51,255,0.05); }
+    .cmd-name { font-size: 12px; font-weight: 600; color: #0033ff; }
+    .cmd-desc { font-size: 10px; color: rgba(15,23,42,0.4); margin-top: 4px; }
+    .terminal {
+      margin: 0 24px; border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; background: #ffffff;
+      padding: 16px; min-height: 200px; max-height: 40vh; overflow-y: auto;
+    }
+    .line { margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.5; }
+    .line.system { color: rgba(15,23,42,0.3); font-style: italic; }
+    .line.prefix { color: #0033ff; }
+    .input-area {
+      display: flex; gap: 8px; padding: 16px 24px;
+      position: fixed; bottom: 56px; left: 0; right: 0;
+      background: #ffffff; border-top: 1px solid rgba(0,51,255,0.08); z-index: 5;
+    }
+    .input-area input {
+      flex: 1; background: #ffffff; border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 12px; color: #0f172a; font-size: 14px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .input-area input:focus { border-color: rgba(0,51,255,0.5); }
+    .run-btn {
+      background: #0033ff; color: #ffffff;
+      border: none; border-radius: 8px; padding: 12px 20px; font-weight: 700;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .spacer { height: 130px; }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="badge"><img src="/logo.png?v=4" alt="HC">COMMAND</div>
+      <a href="/chat" class="menu-btn" title="Dashboard">☰</a>
+    </div>
+    <div class="hero">
+      <h1>Run <span>Commands.</span></h1>
+      <p>Quick command execution interface.</p>
+    </div>
+    </div>
+  <div class="status-bar">
+    <span><span class="dot green"></span>Gateway: Running</span>
+    <span><span class="dot green"></span>API Server: Connected</span>
+    <span><span class="dot yellow"></span>Memory: --</span>
+  </div>
+
+  <div class="cmd-grid">
+    <button class="cmd-btn" onclick="runCmd('hermes status')">
+      <div class="cmd-name">STATUS</div>
+      <div class="cmd-desc">Check agent status</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes sessions list')">
+      <div class="cmd-name">SESSIONS</div>
+      <div class="cmd-desc">List active sessions</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes models list')">
+      <div class="cmd-name">MODELS</div>
+      <div class="cmd-desc">List available models</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes gateway restart')">
+      <div class="cmd-name">RESTART</div>
+      <div class="cmd-desc">Restart gateway</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes logs --tail 20')">
+      <div class="cmd-name">LOGS</div>
+      <div class="cmd-desc">Show recent logs</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes config show')">
+      <div class="cmd-name">CONFIG</div>
+      <div class="cmd-desc">Show configuration</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes plugins list')">
+      <div class="cmd-name">PLUGINS</div>
+      <div class="cmd-desc">List installed plugins</div>
+    </button>
+    <button class="cmd-btn" onclick="runCmd('hermes update check')">
+      <div class="cmd-name">UPDATE</div>
+      <div class="cmd-desc">Check for updates</div>
+    </button>
+  </div>
+
+  <div class="terminal" id="terminal">
+    <div class="line system">Hermes Synth Command Terminal v0.14.0</div>
+    <div class="line system">Type a command or click a quick action above.</div>
+  </div>
+
+  <div class="input-area">
+    <span class="prefix">hermes $</span>
+    <input id="cmdInput" type="text" placeholder="Enter command..." autofocus>
+    <button class="run-btn" id="runBtn">RUN</button>
+  </div>
+  <div class="spacer"></div>
+  
+
+  <nav class="bottom-nav">
+    <a href="/chat" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <a href="/agents"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="4"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>Agents</a>
+    <a href="/editor"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Editor</a>
+    <a href="/terminal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Terminal</a>
+    <a href="/mcp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>MCP</a>
+    <a href="/settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>
+    <a href="/profile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+  </nav>
+
+<script>
+    const terminal = document.getElementById('terminal');
+    const cmdInput = document.getElementById('cmdInput');
+    const runBtn = document.getElementById('runBtn');
+
+    function addLine(cls, text) {
+      const div = document.createElement('div');
+      div.className = 'line ' + cls;
+      div.textContent = text;
+      terminal.appendChild(div);
+      terminal.scrollTop = terminal.scrollHeight;
+    }
+
+    async function runCmd(cmd) {
+      if (!cmd) return;
+      addLine('prompt', '$ ' + cmd);
+      cmdInput.value = '';
+
+      try {
+        const res = await fetch('/api/command', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ command: cmd }),
+        });
+        const data = await res.json();
+        if (data.output) {
+          data.output.split('\n').forEach(line => addLine('output', line));
+        }
+        if (data.error) {
+          addLine('error', data.error);
+        }
+      } catch {
+        addLine('error', 'Connection error.');
+      }
+    }
+
+    runBtn.addEventListener('click', () => runCmd(cmdInput.value.trim()));
+    cmdInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') runCmd(cmdInput.value.trim()); });
+
+    // Initial status check
+    runCmd('hermes status');
+  </script>
+</body>
+</html>

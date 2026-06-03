@@ -1,0 +1,1027 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Chat — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #0a0a0f;
+      color: #e2e8f0;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .chat-layout { display: flex; height: 100vh; }
+
+    /* Sessions panel */
+    .sessions-panel {
+      width: 260px; min-width: 260px;
+      background: #0d0d14;
+      border-right: 1px solid rgba(255,255,255,0.06);
+      display: flex; flex-direction: column;
+      overflow: hidden;
+    }
+    .sessions-header {
+      padding: 16px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .new-chat-btn {
+      width: 100%; padding: 10px 14px;
+      background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.2);
+      color: #a78bfa; border-radius: 8px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.15s;
+    }
+    .new-chat-btn:hover { background: rgba(167,139,250,0.25); color: #c4b5fd; }
+    .new-chat-btn svg { flex-shrink: 0; }
+
+    /* Search */
+    .search-input {
+      width: 100%; padding: 8px 12px;
+      background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; color: #e2e8f0; font-size: 11px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .search-input::placeholder { color: #475569; }
+    .search-input:focus { border-color: rgba(167,139,250,0.4); }
+
+    .sessions-list {
+      flex: 1; overflow-y: auto; padding: 8px;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+    .sessions-list::-webkit-scrollbar { width: 4px; }
+    .sessions-list::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    .session-item {
+      padding: 10px 12px; border-radius: 8px;
+      cursor: pointer; display: flex; align-items: center; gap: 8px;
+      transition: all 0.15s; position: relative;
+      min-height: 40px;
+    }
+    .session-item:hover { background: rgba(255,255,255,0.05); }
+    .session-item.active { background: rgba(255,255,255,0.08); }
+    .session-title {
+      font-size: 12px; color: #94a3b8; font-weight: 500;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      flex: 1;
+    }
+    .session-item.active .session-title { color: #fff; }
+    .session-item:hover .session-title { color: #e2e8f0; }
+    .session-date {
+      font-size: 9px; color: #475569; white-space: nowrap;
+    }
+    .session-actions {
+      display: flex; align-items: center; gap: 2px;
+      opacity: 0; transition: opacity 0.15s;
+    }
+    .session-item:hover .session-actions { opacity: 1; }
+    .session-pin, .session-delete {
+      background: none; border: none; color: #64748b;
+      cursor: pointer; padding: 2px; display: flex; align-items: center;
+      transition: all 0.15s; flex-shrink: 0;
+    }
+    .session-pin:hover { color: #f59e0b; }
+    .session-pin.pinned { opacity: 1; color: #f59e0b; }
+    .session-item .session-pin.pinned { opacity: 1; }
+    .session-delete:hover { color: #ef4444; }
+
+    /* Rename input */
+    .session-rename-input {
+      font-size: 12px; color: #fff; font-weight: 500;
+      background: rgba(255,255,255,0.1); border: 1px solid rgba(167,139,250,0.4);
+      border-radius: 4px; padding: 2px 6px; width: 100%;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+
+    .sessions-footer {
+      padding: 12px 16px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      font-size: 10px; color: #475569; text-align: center;
+    }
+
+    /* Mobile sessions toggle */
+    .sessions-mobile-toggle {
+      display: none;
+      position: fixed; top: 12px; left: 12px; z-index: 1002;
+      background: #111118; border: 1px solid rgba(255,255,255,0.1);
+      color: #fff; width: 36px; height: 36px;
+      border-radius: 8px; cursor: pointer;
+      align-items: center; justify-content: center;
+    }
+    .sessions-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.6); z-index: 1000;
+    }
+
+    /* Main chat area */
+    .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+
+    .chat-topbar {
+      padding: 12px 20px;
+      border-bottom: 1px solid rgba(255,255,255,0.06);
+      display: flex; align-items: center; gap: 12px;
+    }
+    .chat-topbar select {
+      background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0; padding: 8px 12px; border-radius: 8px;
+      font-size: 11px; font-family: 'JetBrains Mono', monospace;
+      cursor: pointer; font-weight: 500; outline: none; flex: 1; max-width: 300px;
+    }
+    .chat-topbar select option { background: #111118; }
+    .topbar-actions { display: flex; gap: 4px; margin-left: auto; }
+    .topbar-btn {
+      background: none; border: 1px solid rgba(255,255,255,0.08);
+      color: #64748b; cursor: pointer; padding: 6px 8px; display: flex;
+      align-items: center; border-radius: 6px; transition: all 0.15s;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; gap: 4px;
+    }
+    .topbar-btn:hover { color: #a78bfa; border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+
+    .chat-area {
+      flex: 1; overflow-y: auto; padding: 20px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .chat-area::-webkit-scrollbar { width: 6px; }
+    .chat-area::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+    .msg { max-width: 85%; padding: 12px 16px; border-radius: 10px; font-size: 13px; line-height: 1.6; word-wrap: break-word; }
+    .msg.user { align-self: flex-end; background: rgba(167,139,250,0.15); border: 1px solid rgba(167,139,250,0.1); color: #e2e8f0; }
+    .msg.assistant { align-self: flex-start; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06); color: #e2e8f0; }
+    .msg.assistant .label { font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: #a78bfa; margin-bottom: 6px; }
+    .msg.system { align-self: center; background: none; color: #475569; font-size: 11px; text-align: center; }
+
+    /* Markdown in assistant messages */
+    .msg.assistant .md-content { line-height: 1.7; }
+    .msg.assistant .md-content p { margin-bottom: 8px; }
+    .msg.assistant .md-content p:last-child { margin-bottom: 0; }
+    .msg.assistant .md-content strong { color: #c4b5fd; font-weight: 600; }
+    .msg.assistant .md-content em { color: #94a3b8; font-style: italic; }
+    .msg.assistant .md-content code {
+      background: rgba(167,139,250,0.12); color: #c4b5fd; padding: 2px 6px;
+      border-radius: 4px; font-size: 12px;
+    }
+    .msg.assistant .md-content pre {
+      background: #0d0d14; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 8px; padding: 12px; margin: 8px 0; overflow-x: auto;
+    }
+    .msg.assistant .md-content pre code {
+      background: none; padding: 0; color: #e2e8f0; font-size: 12px;
+    }
+    .msg.assistant .md-content ul, .msg.assistant .md-content ol {
+      padding-left: 20px; margin: 8px 0;
+    }
+    .msg.assistant .md-content li { margin-bottom: 4px; }
+    .msg.assistant .md-content blockquote {
+      border-left: 3px solid #a78bfa; padding-left: 12px; margin: 8px 0;
+      color: #94a3b8;
+    }
+    .msg.assistant .md-content h1, .msg.assistant .md-content h2, .msg.assistant .md-content h3 {
+      color: #fff; margin: 12px 0 6px; font-size: 14px;
+    }
+    .msg.assistant .md-content a { color: #a78bfa; text-decoration: underline; }
+    .msg.assistant .md-content table {
+      border-collapse: collapse; margin: 8px 0; width: 100%;
+    }
+    .msg.assistant .md-content th, .msg.assistant .md-content td {
+      border: 1px solid rgba(255,255,255,0.1); padding: 6px 10px; font-size: 12px;
+    }
+    .msg.assistant .md-content th { background: rgba(255,255,255,0.05); color: #fff; }
+
+    .typing { align-self: flex-start; color: #475569; font-size: 12px; display: none; padding: 8px 16px; }
+    .typing.show { display: block; }
+    .typing span { animation: blink 1.4s infinite; }
+    .typing span:nth-child(2) { animation-delay: 0.2s; }
+    .typing span:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+    .welcome-screen {
+      flex: 1; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; gap: 16px;
+      padding: 40px; text-align: center;
+    }
+    .welcome-screen h2 { font-size: 24px; color: #fff; font-weight: 700; }
+    .welcome-screen h2 span { color: #a78bfa; }
+    .welcome-screen p { font-size: 13px; color: #64748b; max-width: 400px; }
+    .welcome-shortcuts {
+      display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; margin-top: 8px;
+    }
+    .shortcut-tag {
+      font-size: 10px; color: #475569; background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.06); border-radius: 6px; padding: 4px 10px;
+    }
+    .shortcut-tag kbd {
+      color: #94a3b8; background: rgba(255,255,255,0.06); padding: 1px 4px;
+      border-radius: 3px; font-size: 10px;
+    }
+
+    .input-area {
+      padding: 12px 20px; display: flex; gap: 10px;
+      border-top: 1px solid rgba(255,255,255,0.06);
+      background: #0a0a0f; align-items: center;
+    }
+    .input-area input[type="text"] {
+      flex: 1; background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 14px 16px; font-size: 14px; color: #e2e8f0;
+      outline: none; font-family: 'JetBrains Mono', monospace;
+    }
+    .input-area input[type="text"]::placeholder { color: #475569; }
+    .input-area input[type="text"]:focus { border-color: rgba(167,139,250,0.4); }
+    .send-btn {
+      background: #a78bfa; color: #0a0a0f; border: none; border-radius: 8px;
+      padding: 14px 24px; font-size: 13px; font-weight: 700; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
+      text-transform: uppercase; transition: opacity 0.2s;
+    }
+    .send-btn:hover { opacity: 0.9; }
+    .send-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .attach-btn, .voice-btn { background: none; border: none; color: #64748b; cursor: pointer; padding: 8px; display: flex; align-items: center; transition: color 0.15s; }
+    .attach-btn:hover, .voice-btn:hover { color: #a78bfa; }
+    .voice-btn.recording { color: #ef4444; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.5; } }
+
+    /* Pinned label */
+    .pinned-label {
+      padding: 8px 12px 4px; font-size: 10px; color: #f59e0b;
+      text-transform: uppercase; letter-spacing: 1px; font-weight: 600;
+      display: flex; align-items: center; gap: 4px;
+    }
+
+    @media (max-width: 768px) {
+      .sessions-panel {
+        position: fixed; top: 0; left: 0; bottom: 0;
+        z-index: 1001; transform: translateX(-100%);
+        transition: transform 0.25s ease;
+      }
+      .sessions-panel.open { transform: translateX(0); }
+      .sessions-overlay.open { display: block; }
+      .sessions-mobile-toggle { display: flex; }
+      .chat-topbar { padding-left: 56px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="sessions-overlay" id="sessionsOverlay"></div>
+  <button class="sessions-mobile-toggle" id="sessionsMobileToggle">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+  </button>
+
+  <div class="chat-layout">
+    <div class="sessions-panel" id="sessionsPanel">
+      <div class="sessions-header">
+        <button class="new-chat-btn" id="newChatBtn">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          New Chat
+        </button>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search chats... (Ctrl+K)">
+      </div>
+      <div class="sessions-list" id="sessionsList"></div>
+      <div class="sessions-footer">Chat sessions saved locally</div>
+    </div>
+
+    <div class="chat-main">
+      <div class="chat-topbar">
+        <select id="modelSelect">
+          <optgroup label="Venice AI (Free)">
+            <option value="llama-3.3-70b">Llama 3.3 70B</option>
+            <option value="llama-3.1-405b">Llama 3.1 405B</option>
+            <option value="deepseek-r1-671b">DeepSeek R1</option>
+            <option value="qwen-2.5-vl">Qwen 2.5 VL</option>
+          </optgroup>
+          <optgroup label="OpenAI (API Key)">
+            <option value="openai:gpt-4o">GPT-4o</option>
+            <option value="openai:gpt-4o-mini">GPT-4o Mini</option>
+            <option value="openai:o3-mini">o3-mini</option>
+          </optgroup>
+          <optgroup label="Anthropic (API Key)">
+            <option value="anthropic:claude-sonnet-4-20250514">Claude Sonnet 4</option>
+            <option value="anthropic:claude-3-5-haiku-20241022">Claude 3.5 Haiku</option>
+          </optgroup>
+          <optgroup label="Groq (API Key)">
+            <option value="groq:llama-3.3-70b-versatile">Llama 3.3 70B (Groq)</option>
+            <option value="groq:mixtral-8x7b-32768">Mixtral 8x7B</option>
+            <option value="groq:gemma2-9b-it">Gemma 2 9B</option>
+          </optgroup>
+        </select>
+        <div class="topbar-actions">
+          <button class="topbar-btn" id="exportBtn" title="Export chat (Ctrl+E)">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export
+          </button>
+        </div>
+      </div>
+
+      <div class="chat-area" id="chatArea">
+        <div class="welcome-screen" id="welcomeScreen">
+          <h2>Talk to <span>Synth.</span></h2>
+          <p>Ask anything — your AI agent is ready. Start typing to begin a conversation.</p>
+          <div class="welcome-shortcuts">
+            <span class="shortcut-tag"><kbd>Ctrl+N</kbd> New Chat</span>
+            <span class="shortcut-tag"><kbd>Ctrl+K</kbd> Search</span>
+            <span class="shortcut-tag"><kbd>Ctrl+E</kbd> Export</span>
+            <span class="shortcut-tag"><kbd>Enter</kbd> Send</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="typing" id="typing"><span>.</span><span>.</span><span>.</span> Synth is thinking</div>
+
+      <div class="input-area">
+        <input type="file" id="fileInput" style="display:none" accept="*/*">
+        <button class="attach-btn" id="attachBtn" title="Attach file">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+        </button>
+        <button class="voice-btn" id="voiceBtn" title="Voice input">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z"/><path d="M19 10v2a7 7 0 01-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+        </button>
+        <input id="msgInput" type="text" placeholder="Message Synth..." autofocus>
+        <button class="send-btn" id="sendBtn">SEND</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/sidebar.js?v=2"></script>
+  <script>
+    // --- Markdown setup ---
+    if (typeof marked !== 'undefined') {
+      marked.setOptions({ breaks: true, gfm: true, sanitize: false });
+    }
+
+    function renderMarkdown(text) {
+      if (typeof marked !== 'undefined') {
+        try { return marked.parse(text); }
+        catch { return escapeHtml(text).replace(/\n/g, '<br>'); }
+      }
+      return escapeHtml(text).replace(/\n/g, '<br>');
+    }
+
+    const chatArea = document.getElementById('chatArea');
+    const msgInput = document.getElementById('msgInput');
+    const sendBtn = document.getElementById('sendBtn');
+    const typing = document.getElementById('typing');
+    const sessionsList = document.getElementById('sessionsList');
+    const searchInput = document.getElementById('searchInput');
+
+    const savedModel = localStorage.getItem('hc_default_model');
+    if (savedModel) document.getElementById('modelSelect').value = savedModel;
+
+    // --- Session Management ---
+    const STORAGE_KEY = 'hs_chat_sessions';
+    const ACTIVE_KEY = 'hs_active_session';
+
+    function generateId() {
+      return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+    }
+
+    function getSessions() {
+      try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; }
+      catch { return []; }
+    }
+
+    function saveSessions(sessions) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(sessions));
+    }
+
+    function getActiveSessionId() {
+      return localStorage.getItem(ACTIVE_KEY);
+    }
+
+    function setActiveSessionId(id) {
+      localStorage.setItem(ACTIVE_KEY, id);
+    }
+
+    function getSession(id) {
+      return getSessions().find(s => s.id === id);
+    }
+
+    function createSession() {
+      const session = {
+        id: generateId(),
+        title: 'New Chat',
+        messages: [],
+        model: document.getElementById('modelSelect').value,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+        pinned: false,
+      };
+      const sessions = getSessions();
+      sessions.unshift(session);
+      saveSessions(sessions);
+      return session;
+    }
+
+    function updateSession(id, updates) {
+      const sessions = getSessions();
+      const idx = sessions.findIndex(s => s.id === id);
+      if (idx === -1) return;
+      Object.assign(sessions[idx], updates, { updatedAt: Date.now() });
+      saveSessions(sessions);
+    }
+
+    function deleteSession(id) {
+      let sessions = getSessions();
+      sessions = sessions.filter(s => s.id !== id);
+      saveSessions(sessions);
+      if (getActiveSessionId() === id) {
+        if (sessions.length > 0) {
+          loadSession(sessions[0].id);
+        } else {
+          const ns = createSession();
+          loadSession(ns.id);
+        }
+      }
+      renderSessionsList();
+    }
+
+    function togglePin(id) {
+      const sessions = getSessions();
+      const s = sessions.find(x => x.id === id);
+      if (s) {
+        s.pinned = !s.pinned;
+        saveSessions(sessions);
+        renderSessionsList();
+      }
+    }
+
+    function renameSession(id, newTitle) {
+      if (!newTitle || !newTitle.trim()) return;
+      updateSession(id, { title: newTitle.trim() });
+      renderSessionsList();
+    }
+
+    let currentSessionId = null;
+    let chatHistory = [];
+    let searchQuery = '';
+
+    function renderSessionsList() {
+      const sessions = getSessions();
+      sessionsList.innerHTML = '';
+
+      if (sessions.length === 0) {
+        sessionsList.innerHTML = '<div style="padding:20px;text-align:center;color:#475569;font-size:11px;">No conversations yet</div>';
+        return;
+      }
+
+      // Filter by search
+      const q = searchQuery.toLowerCase();
+      const filtered = q ? sessions.filter(s =>
+        s.title.toLowerCase().includes(q) ||
+        (s.messages || []).some(m => m.content.toLowerCase().includes(q))
+      ) : sessions;
+
+      if (filtered.length === 0) {
+        sessionsList.innerHTML = '<div style="padding:20px;text-align:center;color:#475569;font-size:11px;">No results found</div>';
+        return;
+      }
+
+      // Separate pinned vs unpinned
+      const pinned = filtered.filter(s => s.pinned);
+      const unpinned = filtered.filter(s => !s.pinned);
+
+      // Render pinned first
+      if (pinned.length > 0) {
+        const lbl = document.createElement('div');
+        lbl.className = 'pinned-label';
+        lbl.innerHTML = '<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg> Pinned';
+        sessionsList.appendChild(lbl);
+        pinned.forEach(s => addSessionItem(s));
+      }
+
+      // Group unpinned by date
+      const today = new Date();
+      const yesterday = new Date(today); yesterday.setDate(yesterday.getDate() - 1);
+      const weekAgo = new Date(today); weekAgo.setDate(weekAgo.getDate() - 7);
+
+      const groups = { today: [], yesterday: [], week: [], older: [] };
+      unpinned.forEach(s => {
+        const d = new Date(s.updatedAt);
+        if (d.toDateString() === today.toDateString()) groups.today.push(s);
+        else if (d.toDateString() === yesterday.toDateString()) groups.yesterday.push(s);
+        else if (d > weekAgo) groups.week.push(s);
+        else groups.older.push(s);
+      });
+
+      function addGroup(label, items) {
+        if (items.length === 0) return;
+        const lbl = document.createElement('div');
+        lbl.style.cssText = 'padding:8px 12px 4px;font-size:10px;color:#475569;text-transform:uppercase;letter-spacing:1px;font-weight:600;';
+        lbl.textContent = label;
+        sessionsList.appendChild(lbl);
+        items.forEach(s => addSessionItem(s));
+      }
+
+      addGroup('Today', groups.today);
+      addGroup('Yesterday', groups.yesterday);
+      addGroup('This Week', groups.week);
+      addGroup('Older', groups.older);
+    }
+
+    function addSessionItem(s) {
+      const div = document.createElement('div');
+      div.className = 'session-item' + (s.id === currentSessionId ? ' active' : '');
+      div.innerHTML = `
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" style="flex-shrink:0;opacity:0.5"><path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/></svg>
+        <span class="session-title">${escapeHtml(s.title)}</span>
+        <div class="session-actions">
+          <button class="session-pin ${s.pinned ? 'pinned' : ''}" title="${s.pinned ? 'Unpin' : 'Pin'}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="${s.pinned ? 'currentColor' : 'none'}" stroke="currentColor" stroke-width="2"><path d="M16 12V4h1V2H7v2h1v8l-2 2v2h5.2v6h1.6v-6H18v-2l-2-2z"/></svg>
+          </button>
+          <button class="session-delete" title="Delete">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+      `;
+      // Click to load
+      div.addEventListener('click', (e) => {
+        if (e.target.closest('.session-pin') || e.target.closest('.session-delete')) return;
+        loadSession(s.id);
+        closeSessionsPanel();
+      });
+      // Double-click to rename
+      const titleEl = div.querySelector('.session-title');
+      titleEl.addEventListener('dblclick', (e) => {
+        e.stopPropagation();
+        const input = document.createElement('input');
+        input.className = 'session-rename-input';
+        input.value = s.title;
+        input.maxLength = 60;
+        titleEl.replaceWith(input);
+        input.focus();
+        input.select();
+
+        function commitRename() {
+          renameSession(s.id, input.value);
+        }
+        input.addEventListener('blur', commitRename);
+        input.addEventListener('keydown', (ev) => {
+          if (ev.key === 'Enter') { ev.preventDefault(); commitRename(); }
+          if (ev.key === 'Escape') { renderSessionsList(); }
+        });
+      });
+      // Pin
+      div.querySelector('.session-pin').addEventListener('click', (e) => {
+        e.stopPropagation();
+        togglePin(s.id);
+      });
+      // Delete
+      div.querySelector('.session-delete').addEventListener('click', (e) => {
+        e.stopPropagation();
+        deleteSession(s.id);
+      });
+      sessionsList.appendChild(div);
+    }
+
+    function loadSession(id) {
+      currentSessionId = id;
+      setActiveSessionId(id);
+
+      const session = getSession(id);
+      if (!session) return;
+
+      chatHistory = session.messages.map(m => ({ role: m.role, content: m.content }));
+      document.getElementById('modelSelect').value = session.model || 'llama-3.3-70b';
+
+      chatArea.innerHTML = '';
+
+      if (session.messages.length === 0) {
+        chatArea.innerHTML = `
+          <div class="welcome-screen" id="welcomeScreen">
+            <h2>Talk to <span>Synth.</span></h2>
+            <p>Ask anything — your AI agent is ready. Start typing to begin a conversation.</p>
+            <div class="welcome-shortcuts">
+              <span class="shortcut-tag"><kbd>Ctrl+N</kbd> New Chat</span>
+              <span class="shortcut-tag"><kbd>Ctrl+K</kbd> Search</span>
+              <span class="shortcut-tag"><kbd>Ctrl+E</kbd> Export</span>
+              <span class="shortcut-tag"><kbd>Enter</kbd> Send</span>
+            </div>
+          </div>`;
+      } else {
+        session.messages.forEach(m => {
+          addMsgToDOM(m.role, m.content);
+        });
+      }
+
+      renderSessionsList();
+    }
+
+    function startNewChat() {
+      const ns = createSession();
+      loadSession(ns.id);
+      closeSessionsPanel();
+      msgInput.focus();
+    }
+
+    function escapeHtml(str) {
+      const d = document.createElement('div');
+      d.textContent = str;
+      return d.innerHTML;
+    }
+
+    // --- Chat Logic ---
+    function addMsgToDOM(role, text) {
+      const welcome = document.getElementById('welcomeScreen');
+      if (welcome) welcome.remove();
+
+      const div = document.createElement('div');
+      div.className = 'msg ' + role;
+      if (role === 'assistant') {
+        div.innerHTML = '<div class="label">Synth</div><div class="md-content">' + renderMarkdown(text) + '</div>';
+      } else if (role === 'system') {
+        div.textContent = text;
+      } else {
+        div.textContent = text;
+      }
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      return div;
+    }
+
+    let _veniceKey = null;
+
+    async function getVeniceKey() {
+      if (_veniceKey) return _veniceKey;
+      try {
+        const r = await fetch('/api/get-key');
+        const d = await r.json();
+        if (d.key) { _veniceKey = d.key; return _veniceKey; }
+      } catch {}
+      return null;
+    }
+
+    // Streaming Venice call
+    async function callVeniceStream(messages, model, onChunk, onDone) {
+      const key = await getVeniceKey();
+      if (!key) { onDone('AI service not configured.'); return; }
+      const veniceModel = model.includes(':') ? model.split(':')[1] : model;
+
+      try {
+        const res = await fetch('https://api.venice.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+          body: JSON.stringify({ model: veniceModel, messages, max_tokens: 1024, temperature: 0.7, stream: true }),
+        });
+
+        if (!res.ok) {
+          const err = await res.text();
+          try { const j = JSON.parse(err); onDone(j.error?.message || err); }
+          catch { onDone(err); }
+          return;
+        }
+
+        const reader = res.body.getReader();
+        const decoder = new TextDecoder();
+        let buffer = '';
+        let fullText = '';
+
+        while (true) {
+          const { done, value } = await reader.read();
+          if (done) break;
+          buffer += decoder.decode(value, { stream: true });
+
+          const lines = buffer.split('\n');
+          buffer = lines.pop();
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith('data: ')) continue;
+            const data = trimmed.slice(6);
+            if (data === '[DONE]') continue;
+            try {
+              const parsed = JSON.parse(data);
+              const delta = parsed.choices?.[0]?.delta?.content;
+              if (delta) {
+                fullText += delta;
+                onChunk(fullText);
+              }
+            } catch {}
+          }
+        }
+        onDone(null, fullText);
+      } catch (e) {
+        onDone('Connection error: ' + e.message);
+      }
+    }
+
+    // Non-streaming fallback
+    async function callVeniceDirect(messages, model) {
+      const key = await getVeniceKey();
+      if (!key) return { error: 'AI service not configured.' };
+      const veniceModel = model.includes(':') ? model.split(':')[1] : model;
+      const res = await fetch('https://api.venice.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+        body: JSON.stringify({ model: veniceModel, messages, max_tokens: 1024, temperature: 0.7 }),
+      });
+      const data = await res.json();
+      if (data.error) return { error: data.error.message || JSON.stringify(data.error) };
+      return { reply: data.choices?.[0]?.message?.content || 'No response.' };
+    }
+
+    async function sendMessage() {
+      const text = msgInput.value.trim();
+      if (!text) return;
+
+      if (!currentSessionId) {
+        const ns = createSession();
+        currentSessionId = ns.id;
+        setActiveSessionId(ns.id);
+      }
+
+      addMsgToDOM('user', text);
+      chatHistory.push({ role: 'user', content: text });
+      msgInput.value = '';
+      sendBtn.disabled = true;
+      typing.classList.add('show');
+
+      // Auto-title from first message
+      const session = getSession(currentSessionId);
+      if (session && session.title === 'New Chat' && chatHistory.length === 1) {
+        const title = text.length > 40 ? text.substring(0, 40) + '...' : text;
+        updateSession(currentSessionId, { title });
+        renderSessionsList();
+      }
+
+      try {
+        const model = document.getElementById('modelSelect').value;
+        const msgs = [
+          { role: 'system', content: 'You are Synth, an AI assistant powered by Hermes Synth platform. You are helpful, knowledgeable, and concise. You can use markdown formatting in your responses.' },
+          ...chatHistory.slice(-10)
+        ];
+
+        if (!model.includes(':')) {
+          // Venice — use streaming
+          typing.classList.remove('show');
+          const welcome = document.getElementById('welcomeScreen');
+          if (welcome) welcome.remove();
+
+          const msgDiv = document.createElement('div');
+          msgDiv.className = 'msg assistant';
+          msgDiv.innerHTML = '<div class="label">Synth</div><div class="md-content"></div>';
+          chatArea.appendChild(msgDiv);
+          const contentDiv = msgDiv.querySelector('.md-content');
+          chatArea.scrollTop = chatArea.scrollHeight;
+
+          await callVeniceStream(msgs, model,
+            (partialText) => {
+              contentDiv.innerHTML = renderMarkdown(partialText);
+              chatArea.scrollTop = chatArea.scrollHeight;
+            },
+            (error, fullText) => {
+              if (error) {
+                contentDiv.innerHTML = renderMarkdown(error);
+                chatHistory.push({ role: 'assistant', content: error });
+              } else {
+                contentDiv.innerHTML = renderMarkdown(fullText);
+                chatHistory.push({ role: 'assistant', content: fullText });
+              }
+            }
+          );
+        } else {
+          // Non-Venice providers — use regular call
+          const res = await fetch('/api/chat', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ message: text, model, history: chatHistory.slice(-10) }),
+          });
+          const data = await res.json();
+          typing.classList.remove('show');
+          if (data.reply) {
+            addMsgToDOM('assistant', data.reply);
+            chatHistory.push({ role: 'assistant', content: data.reply });
+          } else {
+            addMsgToDOM('assistant', data.error || 'No response received.');
+          }
+        }
+      } catch (e) {
+        typing.classList.remove('show');
+        addMsgToDOM('assistant', 'Connection error. Please try again.');
+      }
+
+      // Save messages to session
+      updateSession(currentSessionId, {
+        messages: chatHistory.map(m => ({ role: m.role, content: m.content })),
+        model: document.getElementById('modelSelect').value,
+      });
+      renderSessionsList();
+
+      sendBtn.disabled = false;
+      msgInput.focus();
+    }
+
+    sendBtn.addEventListener('click', sendMessage);
+    msgInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') sendMessage(); });
+
+    // New chat button
+    document.getElementById('newChatBtn').addEventListener('click', startNewChat);
+
+    // --- Search ---
+    searchInput.addEventListener('input', (e) => {
+      searchQuery = e.target.value;
+      renderSessionsList();
+    });
+
+    // --- File upload ---
+    const fileInput = document.getElementById('fileInput');
+    document.getElementById('attachBtn').addEventListener('click', () => fileInput.click());
+
+    async function handleFileUpload(file) {
+      if (!file) return;
+      if (file.size > 5 * 1024 * 1024) { alert('File too large (max 5MB)'); return; }
+      const sizeStr = file.size < 1024 ? file.size + 'B' : (file.size/1024).toFixed(1) + 'KB';
+
+      if (!currentSessionId) {
+        const ns = createSession();
+        currentSessionId = ns.id;
+        setActiveSessionId(ns.id);
+      }
+
+      if (file.type.startsWith('image/')) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const div = document.createElement('div');
+          div.className = 'msg user';
+          div.innerHTML = `<img src="${e.target.result}" style="max-width:200px;max-height:200px;border-radius:8px;margin-bottom:4px;display:block"><span style="font-size:11px;color:#64748b">${escapeHtml(file.name)} (${sizeStr})</span>`;
+          chatArea.appendChild(div);
+          chatArea.scrollTop = chatArea.scrollHeight;
+        };
+        reader.readAsDataURL(file);
+      } else {
+        addMsgToDOM('user', `${file.name} (${sizeStr})`);
+      }
+
+      const fd = new FormData();
+      fd.append('file', file);
+      try {
+        const res = await fetch('/api/upload', { method: 'POST', body: fd });
+        const data = await res.json();
+        if (data.ok) {
+          const text = `[User uploaded a file: ${file.name} (${file.type}, ${sizeStr}). Acknowledge the upload and ask if they need help with it.]`;
+          chatHistory.push({ role: 'user', content: text });
+          typing.classList.add('show');
+          const model = document.getElementById('modelSelect').value;
+          const msgs = [{ role: 'system', content: 'You are Synth, an AI assistant.' }, ...chatHistory.slice(-10)];
+          const d2 = !model.includes(':') ? await callVeniceDirect(msgs, model) : await (await fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: text, model, history: chatHistory.slice(-10) }) })).json();
+          typing.classList.remove('show');
+          if (d2.reply) { addMsgToDOM('assistant', d2.reply); chatHistory.push({ role: 'assistant', content: d2.reply }); }
+          updateSession(currentSessionId, {
+            messages: chatHistory.map(m => ({ role: m.role, content: m.content })),
+          });
+          renderSessionsList();
+        } else {
+          addMsgToDOM('system', `Upload failed: ${data.error}`);
+        }
+      } catch { addMsgToDOM('system', 'Upload failed: connection error.'); }
+    }
+
+    fileInput.addEventListener('change', () => { handleFileUpload(fileInput.files[0]); fileInput.value = ''; });
+
+    // Drag and drop
+    const chatMain = document.querySelector('.chat-main');
+    chatMain.addEventListener('dragover', (e) => { e.preventDefault(); });
+    chatMain.addEventListener('drop', (e) => {
+      e.preventDefault();
+      if (e.dataTransfer.files.length) handleFileUpload(e.dataTransfer.files[0]);
+    });
+
+    // --- Voice Input ---
+    let recognition = null;
+    let isRecording = false;
+    const voiceBtn = document.getElementById('voiceBtn');
+
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = true;
+      recognition.lang = 'en-US';
+
+      recognition.onresult = (e) => {
+        let transcript = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          transcript += e.results[i][0].transcript;
+        }
+        msgInput.value = transcript;
+      };
+
+      recognition.onend = () => {
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+        voiceBtn.title = 'Voice input';
+      };
+
+      recognition.onerror = () => {
+        isRecording = false;
+        voiceBtn.classList.remove('recording');
+      };
+
+      voiceBtn.addEventListener('click', () => {
+        if (isRecording) {
+          recognition.stop();
+        } else {
+          recognition.start();
+          isRecording = true;
+          voiceBtn.classList.add('recording');
+          voiceBtn.title = 'Stop recording';
+        }
+      });
+    } else {
+      voiceBtn.style.display = 'none';
+    }
+
+    // --- Export Chat ---
+    function exportChat() {
+      const session = getSession(currentSessionId);
+      if (!session || session.messages.length === 0) {
+        alert('Nothing to export — start a conversation first.');
+        return;
+      }
+
+      let md = `# ${session.title}\n`;
+      md += `_Exported from Hermes Synth — ${new Date().toLocaleString()}_\n\n---\n\n`;
+
+      session.messages.forEach(m => {
+        if (m.role === 'user') {
+          md += `**You:** ${m.content}\n\n`;
+        } else if (m.role === 'assistant') {
+          md += `**Synth:** ${m.content}\n\n`;
+        }
+      });
+
+      const blob = new Blob([md], { type: 'text/markdown' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = session.title.replace(/[^a-zA-Z0-9 ]/g, '').trim().replace(/\s+/g, '-').toLowerCase() + '.md';
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    document.getElementById('exportBtn').addEventListener('click', exportChat);
+
+    // --- Keyboard Shortcuts ---
+    document.addEventListener('keydown', (e) => {
+      // Ctrl+N — new chat
+      if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
+        e.preventDefault();
+        startNewChat();
+      }
+      // Ctrl+K — focus search
+      if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+      // Ctrl+E — export
+      if ((e.ctrlKey || e.metaKey) && e.key === 'e') {
+        e.preventDefault();
+        exportChat();
+      }
+      // Escape — clear search or blur input
+      if (e.key === 'Escape') {
+        if (document.activeElement === searchInput) {
+          searchInput.value = '';
+          searchQuery = '';
+          renderSessionsList();
+          searchInput.blur();
+        }
+      }
+    });
+
+    // Mobile sessions panel
+    function closeSessionsPanel() {
+      document.getElementById('sessionsPanel').classList.remove('open');
+      document.getElementById('sessionsOverlay').classList.remove('open');
+    }
+    document.getElementById('sessionsMobileToggle').addEventListener('click', () => {
+      document.getElementById('sessionsPanel').classList.toggle('open');
+      document.getElementById('sessionsOverlay').classList.toggle('open');
+    });
+    document.getElementById('sessionsOverlay').addEventListener('click', closeSessionsPanel);
+
+    // --- Init ---
+    (function init() {
+      const sessions = getSessions();
+      const activeId = getActiveSessionId();
+
+      if (activeId && sessions.find(s => s.id === activeId)) {
+        loadSession(activeId);
+      } else if (sessions.length > 0) {
+        loadSession(sessions[0].id);
+      } else {
+        const ns = createSession();
+        loadSession(ns.id);
+      }
+    })();
+  </script>
+</body>
+</html>

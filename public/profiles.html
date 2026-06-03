@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profiles — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #0a0a0f; color: #e2e8f0; min-height: 100vh; }
+    .page { max-width: 800px; margin: 0 auto; padding: 0 20px 40px; }
+    .hero { padding: 32px 0 20px; }
+    .hero h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    .hero h1 span { color: #a78bfa; }
+    .hero p { font-size: 13px; color: #64748b; margin-top: 6px; }
+
+    .section-title {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: #64748b; margin-bottom: 16px; font-weight: 600;
+    }
+    .card {
+      background: #111118; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .profile-card {
+      display: flex; flex-direction: column; gap: 10px;
+      padding: 16px; background: #111118;
+      border: 1px solid rgba(255,255,255,0.06); border-radius: 10px;
+      margin-bottom: 10px; transition: all 0.2s;
+    }
+    .profile-card:hover { border-color: rgba(167,139,250,0.3); }
+    .profile-card.active { border-color: rgba(167,139,250,0.5); background: rgba(167,139,250,0.05); }
+    .profile-top { display: flex; align-items: center; justify-content: space-between; }
+    .profile-left { display: flex; align-items: center; gap: 12px; }
+    .profile-avatar {
+      width: 40px; height: 40px; border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .profile-avatar img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; }
+    .profile-name { font-size: 14px; font-weight: 600; color: #fff; }
+    .profile-role { font-size: 11px; color: #64748b; margin-top: 2px; }
+    .profile-badge {
+      font-size: 9px; padding: 3px 10px; border-radius: 4px;
+      background: rgba(52,211,153,0.15); color: #34d399;
+      letter-spacing: 1px; text-transform: uppercase; font-weight: 600;
+    }
+    .profile-prompt {
+      font-size: 12px; color: #475569; line-height: 1.5;
+      max-height: 40px; overflow: hidden;
+    }
+    .profile-actions { display: flex; gap: 8px; }
+    .btn-activate {
+      padding: 6px 14px; background: #a78bfa; color: #fff;
+      border: none; border-radius: 6px; font-size: 11px; font-weight: 600;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; transition: opacity 0.2s;
+    }
+    .btn-activate:hover { opacity: 0.85; }
+    .btn-activate.active-btn { background: rgba(52,211,153,0.2); color: #34d399; cursor: default; }
+    .btn-delete {
+      padding: 6px 14px; background: rgba(239,68,68,0.1);
+      color: #ef4444; border: 1px solid rgba(239,68,68,0.2);
+      border-radius: 6px; font-size: 11px; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-create {
+      width: 100%; padding: 14px; background: rgba(167,139,250,0.1);
+      border: 1px dashed rgba(167,139,250,0.3); border-radius: 10px;
+      color: #a78bfa; font-size: 13px; font-weight: 600;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace;
+      transition: all 0.2s; margin-top: 8px;
+    }
+    .btn-create:hover { background: rgba(167,139,250,0.15); border-color: rgba(167,139,250,0.5); }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,0.7); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px; padding: 24px;
+      width: 100%; max-width: 450px;
+    }
+    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: 1px;
+      text-transform: uppercase; color: #64748b; margin-bottom: 8px; font-weight: 600;
+    }
+    .field input, .field textarea {
+      width: 100%; background: #0a0a0f;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+      padding: 12px 14px; font-size: 13px; color: #e2e8f0;
+      outline: none; font-family: 'JetBrains Mono', monospace;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: rgba(167,139,250,0.5); }
+    .field input::placeholder, .field textarea::placeholder { color: #475569; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions button {
+      flex: 1; padding: 12px; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 600; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .cancel { background: rgba(255,255,255,0.06); color: #e2e8f0; }
+    .save { background: #a78bfa; color: #fff; }
+
+    .loading { color: #475569; text-align: center; padding: 20px; }
+
+    @media (max-width: 768px) {
+      .page { padding: 0 12px 40px; }
+      .hero h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>Agent <span>Profiles.</span></h1>
+      <p>Preset personalities for your AI agents.</p>
+    </div>
+
+    <div id="profileList">
+      <div class="section-title">AGENT PROFILES</div>
+      <div class="loading" id="profilesLoading">Loading profiles...</div>
+      <button class="btn-create" onclick="openModal()">+ Create New Profile</button>
+    </div>
+
+    <div class="modal-overlay" id="modal">
+      <div class="modal">
+        <h2>Create Profile</h2>
+        <div class="field">
+          <label>Name</label>
+          <input type="text" id="pName" placeholder="e.g. Marketing Expert">
+        </div>
+        <div class="field">
+          <label>Role</label>
+          <input type="text" id="pRole" placeholder="e.g. Marketing & growth">
+        </div>
+        <div class="field">
+          <label>System Prompt</label>
+          <textarea id="pPrompt" placeholder="You are a..."></textarea>
+        </div>
+        <div class="modal-actions">
+          <button class="cancel" onclick="closeModal()">Cancel</button>
+          <button class="save" onclick="saveProfile()">Create</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/sidebar.js?v=2"></script>
+  <script>
+    let allProfiles = [];
+
+    function selectProfile(id){
+      fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'activate',id})})
+        .then(()=>loadProfiles());
+    }
+
+    function openModal(){document.getElementById('modal').classList.add('show')}
+    function closeModal(){document.getElementById('modal').classList.remove('show')}
+
+    async function saveProfile(){
+      const name=document.getElementById('pName').value;
+      const role=document.getElementById('pRole').value;
+      const prompt=document.getElementById('pPrompt').value;
+      if(!name||!prompt){alert('Name and prompt required');return}
+      await fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name,role,system_prompt:prompt})});
+      closeModal();
+      document.getElementById('pName').value='';document.getElementById('pRole').value='';document.getElementById('pPrompt').value='';
+      loadProfiles();
+    }
+
+    async function deleteProfile(id){
+      if(!confirm('Delete this profile?'))return;
+      await fetch('/api/profiles',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({action:'delete',id})});
+      loadProfiles();
+    }
+
+    async function loadProfiles(){
+      try {
+        const res = await fetch('/api/profiles');
+        const data = await res.json();
+        allProfiles = data.profiles || [];
+        const container = document.getElementById('profileList');
+        if(!container) return;
+        const createBtn = container.querySelector('.btn-create');
+        container.querySelectorAll('.profile-card').forEach(c=>c.remove());
+
+        allProfiles.forEach((p) => {
+          const card = document.createElement('div');
+          card.className = 'profile-card' + (p.active ? ' active' : '');
+          const initial = (p.name || '?')[0].toUpperCase();
+          card.innerHTML = `
+            <div class="profile-top">
+              <div class="profile-left">
+                <div class="profile-avatar" style="background:rgba(167,139,250,0.1);color:#a78bfa;font-weight:700">${initial}</div>
+                <div>
+                  <div class="profile-name">${p.name}</div>
+                  <div class="profile-role">${p.role || 'General Purpose'}</div>
+                </div>
+              </div>
+              ${p.active ? '<span class="profile-badge">Active</span>' : ''}
+            </div>
+            <div class="profile-prompt">${p.system_prompt || ''}</div>
+            <div class="profile-actions">
+              <button onclick="event.stopPropagation();selectProfile('${p.id}')" class="btn-activate${p.active?' active-btn':''}">${p.active?'ACTIVE':'ACTIVATE'}</button>
+              ${!['default','coder','analyst','writer','devops'].includes(p.id) ? `<button onclick="event.stopPropagation();deleteProfile('${p.id}')" class="btn-delete">DELETE</button>` : ''}
+            </div>
+          `;
+          createBtn.before(card);
+        });
+      } catch {}
+    }
+
+    loadProfiles();
+  </script>
+</body>
+</html>

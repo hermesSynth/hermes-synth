@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profile — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #0a0a0f; color: #e2e8f0; min-height: 100vh; }
+    .page { max-width: 800px; margin: 0 auto; padding: 0 20px 40px; }
+    .hero { padding: 32px 0 20px; }
+    .hero h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    .hero h1 span { color: #a78bfa; }
+    .hero p { font-size: 13px; color: #64748b; margin-top: 6px; }
+
+    .content { padding: 0; }
+    .section { margin-bottom: 24px; }
+    .section-title { font-size: 11px; font-weight: 600; color: #64748b; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px; }
+
+    .avatar-section { text-align: center; margin-bottom: 32px; }
+    .avatar { width: 96px; height: 96px; border-radius: 50%; border: 3px solid rgba(167,139,250,0.3); object-fit: cover; background: #111118; }
+    .avatar-placeholder {
+      width: 96px; height: 96px; border-radius: 50%;
+      border: 3px solid rgba(167,139,250,0.3); background: #111118;
+      display: inline-flex; align-items: center; justify-content: center;
+      font-size: 36px; color: #a78bfa;
+    }
+    .avatar-upload { margin-top: 12px; }
+    .avatar-upload label { font-size: 12px; color: #a78bfa; cursor: pointer; font-weight: 600; }
+    .avatar-upload input { display: none; }
+
+    .card {
+      background: #111118; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px; margin-bottom: 16px;
+    }
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 11px; color: #64748b;
+      margin-bottom: 6px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .field input, .field textarea {
+      width: 100%; background: #0a0a0f;
+      border: 1px solid rgba(255,255,255,0.08); border-radius: 8px;
+      padding: 12px 14px; font-size: 13px; color: #e2e8f0;
+      outline: none; font-family: 'JetBrains Mono', monospace; transition: all 0.2s;
+    }
+    .field input:focus, .field textarea:focus { border-color: rgba(167,139,250,0.5); }
+    .field input::placeholder, .field textarea::placeholder { color: #475569; }
+    .field textarea { resize: vertical; min-height: 80px; }
+    .field input:disabled { background: #0d0d14; color: #475569; border-color: rgba(255,255,255,0.04); }
+
+    .btn {
+      background: #a78bfa; color: #fff; border: none; border-radius: 8px;
+      padding: 12px 24px; font-size: 13px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: all 0.2s;
+    }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid rgba(167,139,250,0.3); color: #a78bfa; }
+    .btn-outline:hover { background: rgba(167,139,250,0.1); }
+    .btn-danger { background: #ef4444; }
+    .btn-danger:hover { background: #dc2626; }
+
+    .msg { font-size: 12px; margin-top: 8px; display: none; }
+    .msg.success { color: #34d399; }
+    .msg.error { color: #ef4444; }
+
+    .info-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .info-row:last-child { border: none; }
+    .info-label { font-size: 12px; color: #64748b; }
+    .info-value { font-size: 13px; font-weight: 600; color: #e2e8f0; }
+
+    @media (max-width: 768px) {
+      .page { padding: 0 12px 40px; }
+      .hero h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>Your <span>Profile</span></h1>
+      <p>manage your account</p>
+    </div>
+
+    <div class="content">
+      <div class="avatar-section">
+        <div id="avatarContainer"></div>
+        <div class="avatar-upload">
+          <label for="avatarInput">Change photo</label>
+          <input type="file" id="avatarInput" accept="image/*">
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Personal Info</div>
+        <div class="card">
+          <div class="field">
+            <label>Name</label>
+            <input type="text" id="nameInput" placeholder="Your name">
+          </div>
+          <div class="field">
+            <label>Email</label>
+            <input type="email" id="emailInput" disabled>
+          </div>
+          <div class="field">
+            <label>Bio</label>
+            <textarea id="bioInput" placeholder="Tell us about yourself..."></textarea>
+          </div>
+          <div id="profileMsg" class="msg"></div>
+          <button class="btn" onclick="saveProfile()">Save Changes</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Change Password</div>
+        <div class="card">
+          <div class="field">
+            <label>Current Password</label>
+            <input type="password" id="currentPw" placeholder="Enter current password">
+          </div>
+          <div class="field">
+            <label>New Password</label>
+            <input type="password" id="newPw" placeholder="Min 6 characters" minlength="6">
+          </div>
+          <div id="pwMsg" class="msg"></div>
+          <button class="btn btn-outline" onclick="changePassword()">Update Password</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Account Info</div>
+        <div class="card">
+          <div class="info-row">
+            <span class="info-label">Plan</span>
+            <span class="info-value" id="planTier">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Member since</span>
+            <span class="info-value" id="memberSince">—</span>
+          </div>
+          <div class="info-row">
+            <span class="info-label">Login method</span>
+            <span class="info-value" id="loginMethod">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="section-title">Danger Zone</div>
+        <div class="card" style="border-color: rgba(239,68,68,0.2);">
+          <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Once you delete your account, there is no going back.</p>
+          <button class="btn btn-danger" onclick="deleteAccount()">Delete Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="/sidebar.js?v=2"></script>
+  <script>
+    let currentUser = null;
+
+    async function loadProfile() {
+      try {
+        const res = await fetch('/api/profile');
+        if (!res.ok) { window.location.href = '/login'; return; }
+        const data = await res.json();
+        currentUser = data.user;
+
+        document.getElementById('nameInput').value = currentUser.name || '';
+        document.getElementById('emailInput').value = currentUser.email || '';
+        document.getElementById('bioInput').value = currentUser.bio || '';
+        document.getElementById('planTier').textContent = (currentUser.plan_tier || 'free_trial').replace('_', ' ');
+
+        const container = document.getElementById('avatarContainer');
+        if (currentUser.avatar) {
+          container.innerHTML = `<img class="avatar" src="${currentUser.avatar}" alt="avatar">`;
+        } else {
+          const initial = (currentUser.name || currentUser.email || '?')[0].toUpperCase();
+          container.innerHTML = `<div class="avatar-placeholder">${initial}</div>`;
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function saveProfile() {
+      const msg = document.getElementById('profileMsg');
+      try {
+        const res = await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: document.getElementById('nameInput').value,
+            bio: document.getElementById('bioInput').value,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = 'Profile updated!';
+          msg.className = 'msg success';
+        } else {
+          msg.textContent = data.error || 'Failed to update';
+          msg.className = 'msg error';
+        }
+      } catch {
+        msg.textContent = 'Network error';
+        msg.className = 'msg error';
+      }
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+
+    async function changePassword() {
+      const msg = document.getElementById('pwMsg');
+      const newPw = document.getElementById('newPw').value;
+      if (newPw.length < 6) {
+        msg.textContent = 'Password must be at least 6 characters';
+        msg.className = 'msg error';
+        msg.style.display = 'block';
+        return;
+      }
+      try {
+        const res = await fetch('/api/change-password', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            currentPassword: document.getElementById('currentPw').value,
+            newPassword: newPw,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          msg.textContent = 'Password updated!';
+          msg.className = 'msg success';
+          document.getElementById('currentPw').value = '';
+          document.getElementById('newPw').value = '';
+        } else {
+          msg.textContent = data.error || 'Failed to change password';
+          msg.className = 'msg error';
+        }
+      } catch {
+        msg.textContent = 'Network error';
+        msg.className = 'msg error';
+      }
+      msg.style.display = 'block';
+      setTimeout(() => msg.style.display = 'none', 3000);
+    }
+
+    async function deleteAccount() {
+      if (!confirm('Are you sure you want to delete your account? This cannot be undone.')) return;
+      if (!confirm('FINAL WARNING: All your data will be permanently deleted.')) return;
+      try {
+        const res = await fetch('/api/delete-account', { method: 'POST' });
+        if (res.ok) {
+          window.location.href = '/login';
+        }
+      } catch {}
+    }
+
+    document.getElementById('avatarInput').addEventListener('change', async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = async () => {
+        const dataUrl = reader.result;
+        document.getElementById('avatarContainer').innerHTML = `<img class="avatar" src="${dataUrl}" alt="avatar">`;
+        await fetch('/api/profile', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ avatar: dataUrl }),
+        });
+      };
+      reader.readAsDataURL(file);
+    });
+
+    loadProfile();
+  </script>
+</body>
+</html>

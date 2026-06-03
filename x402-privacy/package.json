@@ -1,0 +1,24 @@
+{
+  "name": "x402-privacy",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@nomicfoundation/hardhat-ethers": "^4.0.12",
+    "@nomicfoundation/hardhat-toolbox": "^7.0.0",
+    "circomlib": "^2.0.5",
+    "dotenv": "^17.4.2",
+    "ethers": "^6.16.0",
+    "solc": "^0.8.20"
+  },
+  "devDependencies": {
+    "hardhat": "^3.7.0"
+  },
+  "description": "",
+  "type": "module"
+}

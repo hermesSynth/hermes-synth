@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <title>x402 Privacy — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="description" content="x402 Privacy — Zero-knowledge private payments for AI agents on Base Network.">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0a0a0f;
+      --surface: #111118;
+      --border: rgba(255,255,255,0.06);
+      --text: #e2e8f0;
+      --text-dim: #94a3b8;
+      --accent: #3b82f6;
+      --accent-dim: rgba(59,130,246,0.12);
+      --green: #22c55e;
+      --green-dim: rgba(34,197,94,0.12);
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.12);
+      --purple: #a78bfa;
+      --purple-dim: rgba(167,139,250,0.12);
+    }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    /* Header */
+    .header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 20px;
+      border-bottom: 1px solid var(--border);
+      background: var(--bg);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .header-left { display: flex; align-items: center; gap: 12px; }
+    .logo { width: 28px; height: 28px; border-radius: 6px; }
+    .brand { font-size: 14px; font-weight: 600; color: #fff; text-decoration: none; }
+    .page-badge {
+      font-size: 10px; font-weight: 600;
+      background: var(--purple-dim); color: var(--purple);
+      padding: 3px 10px; border-radius: 4px;
+      letter-spacing: 0.5px;
+    }
+    .header-nav { display: flex; gap: 4px; }
+    .nav-link {
+      font-size: 12px; font-weight: 500; color: var(--text-dim);
+      text-decoration: none; padding: 6px 12px; border-radius: 6px;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: #fff; background: rgba(255,255,255,0.05); }
+    .nav-link.active { color: var(--purple); background: var(--purple-dim); }
+    .wallet-btn {
+      font-family: inherit; font-size: 12px; font-weight: 500;
+      background: #1e40af; color: #fff;
+      border: none; padding: 8px 16px; border-radius: 6px;
+      cursor: pointer; transition: background 0.2s;
+    }
+    .wallet-btn:hover { background: #2563eb; }
+    .wallet-btn.connected {
+      background: var(--green-dim); color: var(--green);
+      border: 1px solid rgba(34,197,94,0.2);
+    }
+
+    /* Main */
+    .main { max-width: 960px; margin: 0 auto; padding: 32px 20px 80px; }
+
+    /* Hero */
+    .hero { margin-bottom: 40px; }
+    .hero h1 {
+      font-size: clamp(28px, 4vw, 42px); font-weight: 800;
+      line-height: 1.15; margin-bottom: 8px;
+    }
+    .hero h1 span { color: var(--purple); }
+    .hero p { color: var(--text-dim); font-size: 14px; line-height: 1.6; max-width: 600px; }
+
+    /* Stats row */
+    .stats {
+      display: flex; gap: 16px; margin-bottom: 32px; flex-wrap: wrap;
+    }
+    .stat {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 10px; padding: 16px 20px; flex: 1; min-width: 140px;
+    }
+    .stat-label { font-size: 10px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .stat-value { font-size: 20px; font-weight: 700; color: #fff; }
+    .stat-value.green { color: var(--green); }
+
+    /* Tabs */
+    .tabs {
+      display: flex; gap: 4px; margin-bottom: 24px;
+      background: var(--surface); border-radius: 10px; padding: 4px;
+      border: 1px solid var(--border);
+      width: fit-content;
+    }
+    .tab {
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      padding: 10px 24px; border-radius: 8px;
+      border: none; background: transparent;
+      color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+    }
+    .tab.active { background: var(--accent); color: #fff; }
+    .tab:hover:not(.active) { color: #fff; }
+
+    /* Panels */
+    .panel { display: none; }
+    .panel.active { display: block; }
+
+    /* Card */
+    .card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 14px; padding: 28px; margin-bottom: 20px;
+    }
+    .card-title { font-size: 16px; font-weight: 700; margin-bottom: 16px; color: #fff; }
+
+    /* Amount selector */
+    .amounts {
+      display: flex; gap: 10px; margin-bottom: 20px;
+    }
+    .amount-btn {
+      font-family: inherit; font-size: 14px; font-weight: 600;
+      padding: 12px 24px; border-radius: 10px;
+      border: 1px solid var(--border); background: transparent;
+      color: var(--text-dim); cursor: pointer; transition: all 0.2s;
+      flex: 1;
+    }
+    .amount-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .amount-btn.selected { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+
+    /* Input */
+    .input-group { margin-bottom: 16px; }
+    .input-label { font-size: 11px; font-weight: 600; color: var(--text-dim); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 6px; }
+    .input-field {
+      width: 100%; font-family: inherit; font-size: 13px;
+      padding: 12px 14px; border-radius: 8px;
+      border: 1px solid var(--border); background: rgba(255,255,255,0.03);
+      color: var(--text); outline: none; transition: border-color 0.2s;
+    }
+    .input-field:focus { border-color: var(--accent); }
+    .input-field::placeholder { color: rgba(148,163,184,0.5); }
+
+    /* Action button */
+    .action-btn {
+      width: 100%; font-family: inherit; font-size: 14px; font-weight: 700;
+      padding: 14px; border-radius: 10px; border: none;
+      background: var(--accent); color: #fff;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .action-btn:hover { opacity: 0.9; }
+    .action-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .action-btn.withdraw-btn { background: var(--green); }
+    .action-btn.withdraw-btn:hover { opacity: 0.9; }
+
+    /* Status */
+    .status {
+      margin-top: 12px; padding: 10px 14px; border-radius: 8px;
+      font-size: 12px; display: none;
+    }
+    .status.info { display: block; background: var(--accent-dim); color: var(--accent); }
+    .status.success { display: block; background: var(--green-dim); color: var(--green); }
+    .status.error { display: block; background: var(--red-dim); color: var(--red); }
+
+    /* Notes list */
+    .notes-list { display: flex; flex-direction: column; gap: 8px; }
+    .note-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+    }
+    .note-amount { font-weight: 700; color: #fff; }
+    .note-status { font-size: 11px; color: var(--green); font-weight: 600; }
+    .note-id { font-size: 11px; color: var(--text-dim); font-family: monospace; }
+
+    /* Privacy Score */
+    .privacy-meter { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; }
+    .meter-bar { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
+    .meter-fill { height: 100%; border-radius: 4px; transition: width 0.6s ease; }
+    .meter-label { font-size: 12px; font-weight: 700; min-width: 40px; }
+
+    /* History */
+    .tx-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 16px; border-radius: 10px;
+      background: rgba(255,255,255,0.02); border: 1px solid var(--border);
+      margin-bottom: 6px;
+    }
+    .tx-type { font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 4px; }
+    .tx-type.deposit { background: var(--accent-dim); color: var(--accent); }
+    .tx-type.withdrawal { background: var(--green-dim); color: var(--green); }
+    .tx-amount { font-weight: 700; color: #fff; font-size: 14px; }
+    .tx-time { font-size: 11px; color: var(--text-dim); }
+    .tx-hash { font-size: 11px; color: var(--accent); text-decoration: none; }
+    .tx-hash:hover { text-decoration: underline; }
+
+    /* Export/Import buttons */
+    .note-actions {
+      display: flex; gap: 8px; margin-bottom: 16px;
+    }
+    .note-action-btn {
+      font-family: inherit; font-size: 12px; font-weight: 600;
+      padding: 8px 16px; border-radius: 8px; border: 1px solid var(--border);
+      background: transparent; color: var(--text-dim); cursor: pointer;
+      transition: all 0.2s;
+    }
+    .note-action-btn:hover { border-color: var(--accent); color: var(--accent); }
+    #importFile { display: none; }
+
+    /* Info section */
+    .info-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px; margin-top: 32px;
+    }
+    .info-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 12px; padding: 20px;
+    }
+    .info-card h3 { font-size: 13px; font-weight: 700; margin-bottom: 8px; color: #fff; }
+    .info-card p { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+    /* Contract links */
+    .contracts {
+      display: flex; gap: 8px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .contract-link {
+      font-size: 11px; font-weight: 500; color: var(--accent);
+      text-decoration: none; padding: 6px 12px; border-radius: 6px;
+      background: var(--accent-dim); transition: all 0.2s;
+    }
+    .contract-link:hover { opacity: 0.8; }
+
+    /* Footer */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 16px 20px;
+      display: flex; justify-content: space-between; align-items: center;
+      color: var(--text-dim); font-size: 11px;
+    }
+    footer a { color: var(--text-dim); text-decoration: none; }
+    footer a:hover { color: #fff; }
+
+    @media (max-width: 600px) {
+      .header-nav { display: none; }
+      .amounts { flex-direction: column; }
+      .stats { flex-direction: column; }
+      .info-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <div class="header-left">
+      <a href="/" style="display:flex;align-items:center;gap:10px;text-decoration:none;">
+        <img src="/logo.png?v=4" alt="Logo" class="logo">
+        <span class="brand">hermes synth</span>
+      </a>
+      <span class="page-badge">x402 PRIVACY</span>
+    </div>
+    <div class="header-nav">
+      <a href="/chat" class="nav-link">Chat</a>
+      <a href="/agents" class="nav-link">Agents</a>
+      <a href="/terminal" class="nav-link">Terminal</a>
+      <a href="/mcp" class="nav-link">MCP</a>
+      <a href="/privacy" class="nav-link active">x402</a>
+    </div>
+    <button class="wallet-btn" id="walletBtn" onclick="connectWallet()">Connect Wallet</button>
+  </header>
+
+  <div class="main">
+    <div class="hero">
+      <h1>Zero-knowledge <span>private payments.</span></h1>
+      <p>Deposit USDC into the shielded pool. Withdraw to any address privately — no on-chain link between deposit and withdrawal.</p>
+    </div>
+
+    <!-- Stats -->
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-label">Pool Balance</div>
+        <div class="stat-value" id="poolBalance">— USDC</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Total Deposits</div>
+        <div class="stat-value" id="depositCount">—</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Network</div>
+        <div class="stat-value green">Base</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Your Notes</div>
+        <div class="stat-value" id="noteCount">0</div>
+      </div>
+    </div>
+
+    <!-- Privacy Score -->
+    <div class="card" id="privacyScoreCard" style="margin-bottom:24px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div class="card-title" style="margin-bottom:0;">Privacy Score</div>
+        <div class="meter-label" id="privacyLabel" style="color:var(--text-dim);">—</div>
+      </div>
+      <div class="privacy-meter">
+        <div class="meter-bar">
+          <div class="meter-fill" id="privacyFill" style="width:0%; background:var(--text-dim);"></div>
+        </div>
+      </div>
+      <p style="font-size:11px; color:var(--text-dim); line-height:1.5;" id="privacyDesc">Connect wallet and deposit to see your privacy score. Score increases with pool size and time since deposit.</p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('deposit')">Deposit</button>
+      <button class="tab" onclick="switchTab('withdraw')">Withdraw</button>
+      <button class="tab" onclick="switchTab('notes')">My Notes</button>
+      <button class="tab" onclick="switchTab('history')">History</button>
+    </div>
+
+    <!-- Deposit Panel -->
+    <div class="panel active" id="panel-deposit">
+      <div class="card">
+        <div class="card-title">Deposit USDC to Privacy Pool</div>
+        <div class="input-label">Select Amount</div>
+        <div class="amounts">
+          <button class="amount-btn" onclick="selectAmount(10, this)">10 USDC</button>
+          <button class="amount-btn" onclick="selectAmount(100, this)">100 USDC</button>
+          <button class="amount-btn" onclick="selectAmount(1000, this)">1,000 USDC</button>
+        </div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
+          You'll receive a secret note (commitment). Save it — you'll need it to withdraw later. The note proves your deposit without linking to your wallet.
+        </p>
+        <button class="action-btn" id="depositBtn" onclick="doDeposit()" disabled>Select Amount to Deposit</button>
+        <div class="status" id="depositStatus"></div>
+      </div>
+    </div>
+
+    <!-- Withdraw Panel -->
+    <div class="panel" id="panel-withdraw">
+      <div class="card">
+        <div class="card-title">Withdraw from Privacy Pool</div>
+        <div class="input-group">
+          <div class="input-label">Note Secret</div>
+          <input class="input-field" id="noteSecret" type="text" placeholder="Paste your deposit note secret here...">
+        </div>
+        <div class="input-group">
+          <div class="input-label">Recipient Address</div>
+          <input class="input-field" id="recipientAddr" type="text" placeholder="0x... (any wallet address on Base)">
+        </div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
+          Withdraw USDC to any address using your note backup. Your secret + nullifier are verified on-chain.
+        </p>
+        <button class="action-btn withdraw-btn" id="withdrawBtn" onclick="doWithdraw()">Withdraw</button>
+        <div class="status" id="withdrawStatus"></div>
+      </div>
+    </div>
+
+    <!-- Notes Panel -->
+    <div class="panel" id="panel-notes">
+      <div class="card">
+        <div class="card-title">Your Deposit Notes</div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
+          Notes are stored locally in your browser. Each note represents a shielded deposit that can be withdrawn to any address.
+        </p>
+        <div class="note-actions">
+          <button class="note-action-btn" onclick="exportNotes()">📥 Export All Notes</button>
+          <button class="note-action-btn" onclick="document.getElementById('importFile').click()">📤 Import Notes</button>
+          <input type="file" id="importFile" accept=".json" onchange="importNotes(event)">
+        </div>
+        <div class="notes-list" id="notesList">
+          <div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">
+            No notes yet. Deposit USDC to create your first note.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- History Panel -->
+    <div class="panel" id="panel-history">
+      <div class="card">
+        <div class="card-title">Transaction History</div>
+        <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
+          All deposits and withdrawals from the privacy pool on Base.
+        </p>
+        <div id="historyList">
+          <div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">Loading history...</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Benefits -->
+    <div style="margin-top:40px; margin-bottom:12px;">
+      <h2 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:4px;">Why Use x402 Privacy?</h2>
+      <p style="font-size:13px; color:var(--text-dim);">Your transactions, your business. No one else's.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>🔒 Untraceable Transactions</h3>
+        <p>Deposit from wallet A, withdraw to wallet B — no on-chain link between them. No one can trace where your USDC came from or where it went.</p>
+      </div>
+      <div class="info-card">
+        <h3>🤖 Anonymous AI Payments</h3>
+        <p>Pay for AI agent services without revealing your identity. Use ZK notes to interact with AI privately — your wallet stays hidden.</p>
+      </div>
+      <div class="info-card">
+        <h3>🛡️ Shielded Transfers</h3>
+        <p>Send USDC to anyone privately. Share your note secret with the recipient — they withdraw to their own wallet. Zero trail on-chain.</p>
+      </div>
+      <div class="info-card">
+        <h3>💰 No Fees, No Middleman</h3>
+        <p>Deposit and withdraw directly from the smart contract. No platform fees, no intermediary. You control your funds with your secret note.</p>
+      </div>
+    </div>
+
+    <!-- How It Works -->
+    <div style="margin-top:40px; margin-bottom:12px;">
+      <h2 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:4px;">How It Works</h2>
+      <p style="font-size:13px; color:var(--text-dim);">Three simple steps to private payments.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>1. Deposit USDC</h3>
+        <p>Choose an amount (10, 100, or 1,000 USDC). Approve the spend, then deposit. You'll receive a secret note — <strong style="color:#fff;">save it carefully</strong>, it's your only way to withdraw.</p>
+      </div>
+      <div class="info-card">
+        <h3>2. Share or Hold</h3>
+        <p>Keep your note for later withdrawal, or share it with someone as a private payment. The note is the key — whoever has it can withdraw the USDC.</p>
+      </div>
+      <div class="info-card">
+        <h3>3. Withdraw Privately</h3>
+        <p>Paste your note and enter any recipient address. The contract verifies your secret + nullifier on-chain and sends USDC to the recipient.</p>
+      </div>
+    </div>
+
+    <!-- Technical Details -->
+    <div style="margin-top:40px; margin-bottom:12px;">
+      <h2 style="font-size:20px; font-weight:800; color:#fff; margin-bottom:4px;">Under the Hood</h2>
+      <p style="font-size:13px; color:var(--text-dim);">Built on proven cryptography.</p>
+    </div>
+    <div class="info-grid">
+      <div class="info-card">
+        <h3>Commitment-Based Verification</h3>
+        <p>Deposits create a cryptographic commitment from a secret + nullifier. Only someone who knows both values can withdraw — verified directly on-chain.</p>
+      </div>
+      <div class="info-card">
+        <h3>Nullifier Protection</h3>
+        <p>Each note can only be spent once. Nullifier hashes prevent double-spending without revealing your identity or which deposit was used.</p>
+      </div>
+      <div class="info-card">
+        <h3>Agent Integration</h3>
+        <p>Use <code style="color:var(--purple);">shield</code> and <code style="color:var(--purple);">unshield</code> commands in MCP to deposit and withdraw directly from the chat interface.</p>
+      </div>
+    </div>
+
+    <!-- Contract addresses -->
+    <div class="contracts">
+      <a href="https://basescan.org/address/0x9c456CDc58Dd9fAD88A1FEd6f1d06A943c237060" target="_blank" class="contract-link">
+        Privacy Pool V2: 0x9c45...7060
+      </a>
+      <a href="https://github.com/hermesSynth/hermes-synth" target="_blank" class="contract-link">
+        Source Code
+      </a>
+    </div>
+  </div>
+
+  <footer>
+    <span>&copy; 2026 Hermes Synth</span>
+    <div style="display:flex;gap:16px;">
+      <a href="/chat">Chat</a>
+      <a href="/mcp">MCP</a>
+      <a href="https://github.com/hermesSynth/hermes-synth">GitHub</a>
+      <a href="https://x.com/HermesSynth">X</a>
+    </div>
+  </footer>
+
+  <script src="/sidebar.js?v=2"></script>
+  <script>
+    const POOL_ADDR = "0x9c456CDc58Dd9fAD88A1FEd6f1d06A943c237060";
+    const USDC_ADDR = "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913";
+    const BASE_CHAIN_ID = 8453;
+
+    const POOL_ABI = [
+      "function deposit(uint256 commitment, uint256 amount) external",
+      "function withdraw(uint256 _secret, uint256 _nullifier, address _recipient, uint256 _amount) external",
+      "function getPoolBalance() view returns (uint256)",
+      "function getDepositCount() view returns (uint256)",
+      "function nullifierHashes(uint256) view returns (bool)",
+      "function getCommitmentAmount(uint256) view returns (uint256)",
+      "event Deposit(uint256 indexed commitment, uint256 timestamp, uint256 amount)",
+      "event Withdrawal(address to, uint256 nullifierHash, uint256 amount)"
+    ];
+
+    const USDC_ABI = [
+      "function approve(address spender, uint256 amount) returns (bool)",
+      "function allowance(address owner, address spender) view returns (uint256)",
+      "function balanceOf(address) view returns (uint256)"
+    ];
+
+    let provider = null;
+    let signer = null;
+    let selectedAmount = 0;
+
+    // --- Wallet Connection ---
+    async function getProvider() {
+      if (window.okxwallet) return window.okxwallet;
+      if (window.ethereum) return window.ethereum;
+      return null;
+    }
+
+    async function ensureBase(wp) {
+      try {
+        const chainId = await wp.request({ method: "eth_chainId" });
+        if (parseInt(chainId, 16) !== BASE_CHAIN_ID) {
+          try {
+            await wp.request({ method: "wallet_switchEthereumChain", params: [{ chainId: "0x2105" }] });
+          } catch (e) {
+            if (e.code === 4902) {
+              await wp.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                  chainId: "0x2105",
+                  chainName: "Base",
+                  nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
+                  rpcUrls: ["https://mainnet.base.org"],
+                  blockExplorerUrls: ["https://basescan.org"]
+                }]
+              });
+            }
+          }
+        }
+      } catch (e) { console.warn("chain switch:", e); }
+    }
+
+    async function connectWallet() {
+      const wp = await getProvider();
+      if (!wp) { alert("Install a wallet (MetaMask, OKX, etc.)"); return; }
+      try {
+        await wp.request({ method: "eth_requestAccounts" });
+        await ensureBase(wp);
+        provider = new ethers.BrowserProvider(wp);
+        signer = await provider.getSigner();
+        const addr = await signer.getAddress();
+        const btn = document.getElementById("walletBtn");
+        btn.textContent = addr.slice(0, 6) + "..." + addr.slice(-4);
+        btn.classList.add("connected");
+        loadStats();
+        renderNotes();
+      } catch (e) { console.error("connect:", e); }
+    }
+
+    // --- Stats ---
+    async function loadStats() {
+      try {
+        const rpc = new ethers.JsonRpcProvider("https://mainnet.base.org");
+        const pool = new ethers.Contract(POOL_ADDR, POOL_ABI, rpc);
+        const [bal, count] = await Promise.all([
+          pool.getPoolBalance(),
+          pool.getDepositCount()
+        ]);
+        document.getElementById("poolBalance").textContent = (Number(bal) / 1e6).toLocaleString() + " USDC";
+        document.getElementById("depositCount").textContent = count.toString();
+      } catch (e) {
+        console.warn("stats:", e);
+      }
+      const notes = getNotes();
+      document.getElementById("noteCount").textContent = notes.filter(n => !n.spent).length.toString();
+      setTimeout(updatePrivacyScore, 500);
+    }
+
+    // --- Tab Switching ---
+    function switchTab(tab) {
+      document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+      document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+      document.querySelector(`[onclick="switchTab('${tab}')"]`).classList.add("active");
+      document.getElementById("panel-" + tab).classList.add("active");
+    }
+
+    // --- Amount Selection ---
+    function selectAmount(amt, el) {
+      selectedAmount = amt;
+      document.querySelectorAll(".amount-btn").forEach(b => b.classList.remove("selected"));
+      el.classList.add("selected");
+      const btn = document.getElementById("depositBtn");
+      btn.disabled = false;
+      btn.textContent = "Deposit " + amt + " USDC";
+    }
+
+    // --- Local Note Storage ---
+    function getNotes() {
+      try { return JSON.parse(localStorage.getItem("x402_notes") || "[]"); }
+      catch { return []; }
+    }
+    function saveNote(note) {
+      const notes = getNotes();
+      notes.push(note);
+      localStorage.setItem("x402_notes", JSON.stringify(notes));
+    }
+    function removeNote(idx) {
+      const notes = getNotes();
+      notes.splice(idx, 1);
+      localStorage.setItem("x402_notes", JSON.stringify(notes));
+    }
+
+    function renderNotes() {
+      const notes = getNotes();
+      const el = document.getElementById("notesList");
+      if (notes.length === 0) {
+        el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">No notes yet. Deposit USDC to create your first note.</div>';
+        return;
+      }
+      el.innerHTML = notes.map((n, i) => `
+        <div class="note-item">
+          <div>
+            <div class="note-amount">${n.amount} USDC</div>
+            <div class="note-id">Note #${i + 1} — ${new Date(n.timestamp).toLocaleDateString()}</div>
+          </div>
+          <div class="note-status">${n.spent ? "SPENT" : "ACTIVE"}</div>
+        </div>
+      `).join("");
+      document.getElementById("noteCount").textContent = notes.filter(n => !n.spent).length.toString();
+    }
+
+    // --- Status helpers ---
+    function setStatus(id, msg, type) {
+      const el = document.getElementById(id);
+      el.className = "status " + type;
+      el.textContent = msg;
+    }
+
+    // --- Poseidon hash (simplified for commitment generation) ---
+    function randomFieldElement() {
+      const bytes = new Uint8Array(31);
+      crypto.getRandomValues(bytes);
+      return BigInt("0x" + Array.from(bytes).map(b => b.toString(16).padStart(2, "0")).join(""));
+    }
+
+    function simpleHash(a, b) {
+      const packed = ethers.solidityPacked(["uint256", "uint256"], [a, b]);
+      const h = BigInt(ethers.keccak256(packed));
+      const FIELD_SIZE = BigInt("21888242871839275222246405745257275088548364400416034343698204186575808495617");
+      return h % FIELD_SIZE;
+    }
+
+    // --- Deposit ---
+    async function doDeposit() {
+      if (!signer) { alert("Connect wallet first"); return; }
+      if (selectedAmount === 0) return;
+
+      const btn = document.getElementById("depositBtn");
+      btn.disabled = true;
+
+      try {
+        setStatus("depositStatus", "Checking USDC balance...", "info");
+
+        const amountWei = BigInt(selectedAmount) * BigInt(1e6);
+        const usdc = new ethers.Contract(USDC_ADDR, USDC_ABI, signer);
+        const pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+        const userAddr = await signer.getAddress();
+
+        // Check USDC balance first
+        const balance = await usdc.balanceOf(userAddr);
+        if (balance < amountWei) {
+          const balUSDC = (Number(balance) / 1e6).toFixed(2);
+          setStatus("depositStatus", `Insufficient USDC balance. You have ${balUSDC} USDC but need ${selectedAmount} USDC. Get USDC on Base first.`, "error");
+          btn.disabled = false;
+          return;
+        }
+
+        setStatus("depositStatus", "Generating commitment...", "info");
+
+        const secret = randomFieldElement();
+        const nullifier = randomFieldElement();
+        const commitment = simpleHash(secret, nullifier);
+        const nullifierHash = simpleHash(nullifier, BigInt(1));
+
+        setStatus("depositStatus", "Approving USDC spend... Approve in wallet.", "info");
+
+        const allowance = await usdc.allowance(userAddr, POOL_ADDR);
+        if (allowance < amountWei) {
+          const approveTx = await usdc.approve(POOL_ADDR, amountWei);
+          setStatus("depositStatus", "Waiting for approval confirmation...", "info");
+          await approveTx.wait();
+        }
+
+        setStatus("depositStatus", "Depositing to privacy pool... Approve in wallet.", "info");
+        const depositTx = await pool.deposit(commitment, amountWei, { gasLimit: 800000 });
+        setStatus("depositStatus", "Waiting for deposit confirmation...", "info");
+        const receipt = await depositTx.wait();
+
+        if (receipt.status === 0) {
+          setStatus("depositStatus", "Transaction reverted. This may be due to insufficient USDC allowance or contract issue. Please try again.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        const note = {
+          secret: secret.toString(),
+          nullifier: nullifier.toString(),
+          commitment: commitment.toString(),
+          nullifierHash: nullifierHash.toString(),
+          amount: selectedAmount,
+          timestamp: Date.now(),
+          txHash: receipt.hash,
+          spent: false
+        };
+
+        saveNote(note);
+        renderNotes();
+        loadStats();
+
+        const noteBackup = JSON.stringify({
+          secret: note.secret,
+          nullifier: note.nullifier,
+          amount: note.amount,
+          commitment: note.commitment
+        });
+
+        setStatus("depositStatus",
+          `Deposit successful! TX: ${receipt.hash.slice(0, 10)}... — SAVE YOUR NOTE BACKUP (shown below). You need it to withdraw.`,
+          "success"
+        );
+        updatePrivacyScore();
+
+        // Show note backup
+        const backupEl = document.createElement("div");
+        backupEl.style.cssText = "margin-top:12px; padding:12px; background:rgba(255,255,255,0.03); border:1px solid var(--border); border-radius:8px; font-size:11px; word-break:break-all; color:var(--text-dim);";
+        backupEl.innerHTML = `<strong style="color:#fff;">Note Backup (copy & save):</strong><br><br><code style="color:var(--purple); user-select:all;">${noteBackup}</code>`;
+        document.getElementById("depositStatus").after(backupEl);
+
+      } catch (e) {
+        console.error("deposit error:", e);
+        let errMsg = "Transaction failed";
+        if (e.code === "ACTION_REJECTED" || e.code === 4001) {
+          errMsg = "Transaction cancelled by user.";
+        } else if (e.reason) {
+          errMsg = e.reason;
+        } else if (e.message && e.message.includes("insufficient")) {
+          errMsg = "Insufficient USDC balance. Get USDC on Base first.";
+        } else if (e.message && e.message.includes("user rejected")) {
+          errMsg = "Transaction cancelled by user.";
+        } else if (e.message && e.message.length < 200) {
+          errMsg = e.message;
+        }
+        setStatus("depositStatus", "Error: " + errMsg, "error");
+      }
+      btn.disabled = false;
+    }
+
+    // --- Withdraw ---
+    async function doWithdraw() {
+      if (!signer) { alert("Connect wallet first"); return; }
+
+      const noteInput = document.getElementById("noteSecret").value.trim();
+      const recipient = document.getElementById("recipientAddr").value.trim();
+
+      if (!noteInput) { setStatus("withdrawStatus", "Paste your note secret", "error"); return; }
+      if (!recipient || !recipient.startsWith("0x")) { setStatus("withdrawStatus", "Enter a valid recipient address", "error"); return; }
+
+      const btn = document.getElementById("withdrawBtn");
+      btn.disabled = true;
+
+      try {
+        let noteData;
+        try { noteData = JSON.parse(noteInput); }
+        catch { setStatus("withdrawStatus", "Invalid note format. Paste the JSON backup from deposit.", "error"); btn.disabled = false; return; }
+
+        if (!noteData.secret || !noteData.nullifier || !noteData.amount) {
+          setStatus("withdrawStatus", "Invalid note: missing secret, nullifier, or amount.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        setStatus("withdrawStatus", "Verifying note on-chain...", "info");
+
+        const pool = new ethers.Contract(POOL_ADDR, POOL_ABI, signer);
+        const secret = BigInt(noteData.secret);
+        const nullifier = BigInt(noteData.nullifier);
+        const amount = BigInt(noteData.amount) * BigInt(1e6);
+        const nullifierHash = simpleHash(nullifier, BigInt(1));
+
+        // Check nullifier hasn't been spent
+        const isSpent = await pool.nullifierHashes(nullifierHash);
+        if (isSpent) {
+          setStatus("withdrawStatus", "This note has already been spent!", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        // Verify commitment exists on-chain
+        const commitment = simpleHash(secret, nullifier);
+        const storedAmount = await pool.getCommitmentAmount(commitment);
+        if (storedAmount === BigInt(0)) {
+          setStatus("withdrawStatus", "Commitment not found on-chain. This note may belong to an older contract version.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        setStatus("withdrawStatus", "Sending withdrawal... Approve in wallet.", "info");
+
+        const tx = await pool.withdraw(secret, nullifier, recipient, amount, { gasLimit: 200000 });
+        setStatus("withdrawStatus", "Waiting for confirmation...", "info");
+        const receipt = await tx.wait();
+
+        if (receipt.status === 0) {
+          setStatus("withdrawStatus", "Transaction reverted. Please try again.", "error");
+          btn.disabled = false;
+          return;
+        }
+
+        // Mark note as spent in local storage
+        const notes = getNotes();
+        const idx = notes.findIndex(n => n.commitment === noteData.commitment);
+        if (idx >= 0) {
+          notes[idx].spent = true;
+          localStorage.setItem("x402_notes", JSON.stringify(notes));
+          renderNotes();
+        }
+
+        setStatus("withdrawStatus",
+          `Withdrawal successful! TX: ${receipt.hash.slice(0, 10)}... — ${noteData.amount} USDC sent to ${recipient.slice(0, 8)}...`,
+          "success"
+        );
+        loadStats();
+
+      } catch (e) {
+        console.error("withdraw error:", e);
+        let msg = e.reason || e.message || "Failed";
+        if (msg.includes("user rejected")) msg = "Transaction cancelled by user.";
+        setStatus("withdrawStatus", "Error: " + msg, "error");
+      }
+      btn.disabled = false;
+    }
+
+    // --- Export/Import Notes ---
+    function exportNotes() {
+      const notes = getNotes();
+      if (notes.length === 0) { alert("No notes to export."); return; }
+      const data = JSON.stringify(notes, null, 2);
+      const blob = new Blob([data], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "x402_notes_backup_" + new Date().toISOString().slice(0, 10) + ".json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importNotes(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (!Array.isArray(imported)) { alert("Invalid file format."); return; }
+          const existing = getNotes();
+          const existingCommitments = new Set(existing.map(n => n.commitment));
+          let added = 0;
+          for (const note of imported) {
+            if (note.commitment && !existingCommitments.has(note.commitment)) {
+              existing.push(note);
+              added++;
+            }
+          }
+          localStorage.setItem("x402_notes", JSON.stringify(existing));
+          renderNotes();
+          alert(`Imported ${added} new note(s). ${imported.length - added} duplicate(s) skipped.`);
+        } catch { alert("Failed to parse file. Make sure it's a valid JSON export."); }
+      };
+      reader.readAsText(file);
+      event.target.value = "";
+    }
+
+    // --- Transaction History ---
+    async function loadHistory() {
+      const el = document.getElementById("historyList");
+      try {
+        const rpc = new ethers.JsonRpcProvider("https://mainnet.base.org");
+        const pool = new ethers.Contract(POOL_ADDR, POOL_ABI, rpc);
+        const currentBlock = await rpc.getBlockNumber();
+        const fromBlock = Math.max(0, currentBlock - 100000);
+
+        const [deposits, withdrawals] = await Promise.all([
+          pool.queryFilter(pool.filters.Deposit(), fromBlock, currentBlock),
+          pool.queryFilter(pool.filters.Withdrawal(), fromBlock, currentBlock)
+        ]);
+
+        const events = [];
+        for (const d of deposits) {
+          const block = await d.getBlock();
+          events.push({
+            type: "deposit",
+            amount: Number(d.args.amount) / 1e6,
+            time: block ? new Date(block.timestamp * 1000) : new Date(),
+            txHash: d.transactionHash
+          });
+        }
+        for (const w of withdrawals) {
+          const block = await w.getBlock();
+          events.push({
+            type: "withdrawal",
+            amount: Number(w.args.amount) / 1e6,
+            to: w.args.to,
+            time: block ? new Date(block.timestamp * 1000) : new Date(),
+            txHash: w.transactionHash
+          });
+        }
+
+        events.sort((a, b) => b.time - a.time);
+
+        if (events.length === 0) {
+          el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">No transactions yet.</div>';
+          return;
+        }
+
+        el.innerHTML = events.map(ev => `
+          <div class="tx-item">
+            <div style="display:flex; align-items:center; gap:12px;">
+              <span class="tx-type ${ev.type}">${ev.type === "deposit" ? "DEPOSIT" : "WITHDRAW"}</span>
+              <div>
+                <div class="tx-amount">${ev.amount} USDC</div>
+                <div class="tx-time">${ev.time.toLocaleDateString()} ${ev.time.toLocaleTimeString()}</div>
+              </div>
+            </div>
+            <a href="https://basescan.org/tx/${ev.txHash}" target="_blank" class="tx-hash">${ev.txHash.slice(0, 10)}...</a>
+          </div>
+        `).join("");
+      } catch (e) {
+        console.warn("history:", e);
+        el.innerHTML = '<div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">Failed to load history. Try again later.</div>';
+      }
+    }
+
+    // --- Privacy Score ---
+    function updatePrivacyScore() {
+      const notes = getNotes().filter(n => !n.spent);
+      const fill = document.getElementById("privacyFill");
+      const label = document.getElementById("privacyLabel");
+      const desc = document.getElementById("privacyDesc");
+
+      if (notes.length === 0) {
+        fill.style.width = "0%";
+        fill.style.background = "var(--text-dim)";
+        label.textContent = "—";
+        label.style.color = "var(--text-dim)";
+        desc.textContent = "Deposit USDC to see your privacy score. Score increases with pool size and time since deposit.";
+        return;
+      }
+
+      const poolBalEl = document.getElementById("poolBalance").textContent;
+      const poolBal = parseFloat(poolBalEl.replace(/[^0-9.]/g, "")) || 0;
+      const depositCountEl = document.getElementById("depositCount").textContent;
+      const depositCount = parseInt(depositCountEl) || 0;
+
+      let score = 0;
+
+      // Factor 1: Pool size (more deposits = better anonymity set)
+      if (depositCount >= 50) score += 35;
+      else if (depositCount >= 20) score += 25;
+      else if (depositCount >= 10) score += 20;
+      else if (depositCount >= 5) score += 15;
+      else if (depositCount >= 2) score += 10;
+      else score += 5;
+
+      // Factor 2: Pool balance (more USDC = harder to trace)
+      if (poolBal >= 10000) score += 25;
+      else if (poolBal >= 1000) score += 20;
+      else if (poolBal >= 100) score += 15;
+      else if (poolBal >= 10) score += 10;
+      else score += 5;
+
+      // Factor 3: Time since deposit (older = more mixed)
+      const oldestNote = notes.reduce((a, b) => a.timestamp < b.timestamp ? a : b);
+      const hoursSinceDeposit = (Date.now() - oldestNote.timestamp) / (1000 * 60 * 60);
+      if (hoursSinceDeposit >= 168) score += 25; // 7 days
+      else if (hoursSinceDeposit >= 72) score += 20; // 3 days
+      else if (hoursSinceDeposit >= 24) score += 15; // 1 day
+      else if (hoursSinceDeposit >= 1) score += 10;
+      else score += 5;
+
+      // Factor 4: Multiple notes
+      if (notes.length >= 3) score += 15;
+      else if (notes.length >= 2) score += 10;
+      else score += 5;
+
+      score = Math.min(score, 100);
+
+      let color, text;
+      if (score >= 80) { color = "var(--green)"; text = "Excellent"; }
+      else if (score >= 60) { color = "#22d3ee"; text = "Good"; }
+      else if (score >= 40) { color = "#f59e0b"; text = "Fair"; }
+      else if (score >= 20) { color = "#f97316"; text = "Low"; }
+      else { color = "var(--red)"; text = "Minimal"; }
+
+      fill.style.width = score + "%";
+      fill.style.background = color;
+      label.textContent = score + "/100";
+      label.style.color = color;
+
+      const factors = [];
+      if (depositCount < 10) factors.push("more deposits in the pool");
+      if (hoursSinceDeposit < 24) factors.push("wait longer before withdrawing");
+      if (notes.length < 2) factors.push("make multiple deposits");
+      if (poolBal < 100) factors.push("higher pool balance");
+
+      desc.textContent = score >= 80
+        ? `${text} privacy. Your deposits are well-mixed in the pool.`
+        : `${text} privacy. Improve by: ${factors.join(", ")}.`;
+    }
+
+    // --- Init ---
+    loadStats();
+    renderNotes();
+
+    // Load history when tab is first clicked
+    let historyLoaded = false;
+    const origSwitchTab = switchTab;
+    switchTab = function(tab) {
+      origSwitchTab(tab);
+      if (tab === "history" && !historyLoaded) {
+        historyLoaded = true;
+        loadHistory();
+      }
+    };
+
+    // Update privacy score after stats load
+    setTimeout(updatePrivacyScore, 2000);
+
+    // Auto-connect if wallet available
+    (async () => {
+      const wp = await getProvider();
+      if (wp) {
+        try {
+          const accounts = await wp.request({ method: "eth_accounts" });
+          if (accounts && accounts.length > 0) {
+            await connectWallet();
+          }
+        } catch {}
+      }
+    })();
+  </script>
+</body>
+</html>

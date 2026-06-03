@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agent Config — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .page { position: relative; z-index: 1; padding: 0 0 80px 0; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    .topbar .badge {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.3);
+      color: #0033ff;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .topbar .badge img { width: 20px; height: 20px; }
+    .topbar .menu-btn {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a;
+      width: 40px; height: 40px; border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; text-decoration: none;
+    }
+    .hero { padding: 8px 24px 20px; }
+    .hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px; font-weight: 400; line-height: 1.15; color: #0f172a;
+    }
+    .hero h1 span { color: #0033ff; }
+    .hero p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: rgba(15,23,42,0.5); margin-top: 8px;
+    }
+    .card {
+      margin: 0 24px 16px;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      background: #ffffff;
+    }
+    .card h3 {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(15,23,42,0.5); margin-bottom: 16px;
+    }
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(15,23,42,0.5); margin-bottom: 10px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      color: #0f172a; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(0,51,255,0.5); }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(15,23,42,0.3); }
+    .field select option { background: #ffffff; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: #0033ff;
+      color: #ffffff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .btn-secondary:hover { border-color: rgba(0,51,255,0.3); }
+    .btn-danger {
+      padding: 10px 20px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .item-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      border-radius: 8px; padding: 16px;
+      margin-bottom: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .item-card:hover { border-color: rgba(0,51,255,0.3); background: rgba(0,51,255,0.05); }
+    .item-card .name { font-size: 14px; font-weight: 600; color: #0f172a; }
+    .item-card .desc { font-size: 12px; color: rgba(15,23,42,0.5); margin-top: 4px; }
+    .item-card .meta { font-size: 10px; color: rgba(15,23,42,0.4); margin-top: 8px; display: flex; gap: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-sm {
+      font-size: 9px; padding: 2px 8px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .badge-sm.active { background: rgba(52,211,153,0.15); color: #34d399; }
+    .badge-sm.paused { background: #ffffff; color: #0033ff; }
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: rgba(15,23,42,0.4);
+    }
+    .empty-state h3 { font-size: 16px; color: rgba(15,23,42,0.5); margin-bottom: 8px; font-family: Georgia, serif; }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-family: Georgia, serif; font-size: 20px; margin-bottom: 20px; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff;
+      border-top: 1px solid rgba(0,51,255,0.08);
+      display: flex; justify-content: space-around;
+      padding: 10px 0 14px; z-index: 10;
+    }
+    .bottom-nav a {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      text-decoration: none; color: rgba(15,23,42,0.4);
+      font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      transition: color 0.2s;
+    }
+    .bottom-nav a:hover, .bottom-nav a.active { color: #0033ff; }
+    .bottom-nav img { width: 22px; height: 22px; }
+    @media (max-width: 480px) {
+      .hero { padding: 8px 12px 12px; }
+      .hero h1 { font-size: 22px; }
+      .hero p { font-size: 12px; }
+      .chat-card { margin: 0 8px; }
+      .input-area { padding: 8px 10px; }
+    }
+    @media (min-width: 768px) {
+      .page { max-width: 700px; margin: 0 auto; }
+      .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); border-radius: 12px 12px 0 0; }
+    }
+
+    .section { margin-bottom: 20px; }
+    .section-title {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(15,23,42,0.4); margin-bottom: 12px; font-weight: 600;
+    }
+    .btn { 
+      padding: 10px 20px; border: none; border-radius: 8px;
+      font-size: 12px; font-weight: 600; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .btn-outline {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a; padding: 10px 20px; border-radius: 8px;
+      font-size: 12px; cursor: pointer; font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-outline:hover { border-color: rgba(0,51,255,0.3); }
+    .env-row { display: flex; gap: 8px; margin-bottom: 8px; align-items: center; }
+    .env-key, .env-val {
+      flex: 1; background: #ffffff; border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 10px 12px; color: #0f172a; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .env-row .remove { color: #ef4444; cursor: pointer; font-size: 16px; padding: 4px; }
+    .saved { color: #34d399; font-size: 12px; display: none; }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="badge"><img src="/logo.png?v=4" alt="HC">CONFIG</div>
+      <a href="/chat" class="menu-btn" title="Dashboard">☰</a>
+    </div>
+    <div class="hero">
+      <h1>Agent <span>Config.</span></h1>
+      <p>Model, temperature, system prompt, and tools.</p>
+    </div>
+    <div class="card">
+    <div class="section">
+      <div class="section-title">DEFAULT MODEL</div>
+      <div class="card">
+        <div class="field">
+          <label>AI Model</label>
+          <select id="model">
+            <option value="llama-3.3-70b">Llama 3.3 70B</option>
+            <option value="llama-3.1-405b">Llama 3.1 405B</option>
+            <option value="deepseek-r1-671b">DeepSeek R1 671B</option>
+            <option value="qwen-2.5-vl">Qwen 2.5 VL 72B</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Temperature</label>
+          <input type="range" id="temp" min="0" max="1" step="0.1" value="0.7" style="accent-color:#0033ff">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:rgba(15,23,42,0.3)"><span>Precise (0)</span><span id="tempVal">0.7</span><span>Creative (1)</span></div>
+        </div>
+        <div class="field">
+          <label>Max Tokens</label>
+          <input type="number" id="maxTokens" value="4096" min="256" max="16384" step="256">
+        </div>
+        <div class="field">
+          <label>System Prompt</label>
+          <textarea id="systemPrompt" placeholder="You are a helpful AI assistant...">You are a helpful AI assistant powered by Hermes Synth.</textarea>
+        </div>
+        <button class="btn" onclick="saveConfig()">Save Configuration</button>
+        <div class="saved" id="saved">Configuration saved!</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">ENVIRONMENT VARIABLES</div>
+      <div class="card">
+        <div id="envVars">
+          <div class="env-row">
+            <input type="text" placeholder="KEY" class="env-key">
+            <input type="text" placeholder="value" class="env-val">
+            <button class="remove" onclick="this.parentElement.remove()">×</button>
+          </div>
+        </div>
+        <button class="btn btn-outline" onclick="addEnvRow()" style="margin-top:8px">+ Add Variable</button>
+        <button class="btn" onclick="saveEnv()" style="margin-top:8px">Save Variables</button>
+        <div class="saved" id="envSaved">Variables saved!</div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">TOOLS & CAPABILITIES</div>
+      <div class="card">
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;font-size:13px">
+          <input type="checkbox" id="toolChat" checked style="accent-color:#0033ff"> Chat / Conversation
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;font-size:13px">
+          <input type="checkbox" id="toolTerminal" checked style="accent-color:#0033ff"> Terminal / Commands
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;font-size:13px">
+          <input type="checkbox" id="toolBrowser" style="accent-color:#0033ff"> Browser / Web Scraping
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;font-size:13px">
+          <input type="checkbox" id="toolCode" checked style="accent-color:#0033ff"> Code Editor / Build
+        </label>
+        <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px 0;font-size:13px">
+          <input type="checkbox" id="toolCron" style="accent-color:#0033ff"> Cron / Scheduled Tasks
+        </label>
+        <button class="btn" onclick="saveTools()" style="margin-top:12px">Save Tools</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="/chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <a href="/agents"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="4"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>Agents</a>
+    <a href="/editor"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Editor</a>
+    <a href="/terminal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Terminal</a>
+    <a href="/mcp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>MCP</a>
+    <a href="/settings" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>
+    <a href="/profile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+  </nav>
+
+<script>
+    document.getElementById('temp').addEventListener('input',e=>{document.getElementById('tempVal').textContent=e.target.value});
+    function addEnvRow(key,val){
+      const d=document.createElement('div');d.className='env-row';
+      d.innerHTML=`<input type="text" placeholder="KEY" class="env-key" value="${key||''}"><input type="text" placeholder="value" class="env-val" value="${val||''}"><button class="remove" onclick="this.parentElement.remove()">×</button>`;
+      document.getElementById('envVars').appendChild(d);
+    }
+    function flash(id){const el=document.getElementById(id);el.style.display='block';setTimeout(()=>el.style.display='none',2000)}
+
+    function getConfigData() {
+      const envRows=[...document.querySelectorAll('.env-row')].map(r=>({key:r.querySelector('.env-key').value,val:r.querySelector('.env-val').value})).filter(r=>r.key);
+      return {
+        model: document.getElementById('model').value,
+        temperature: parseFloat(document.getElementById('temp').value),
+        maxTokens: parseInt(document.getElementById('maxTokens').value),
+        systemPrompt: document.getElementById('systemPrompt').value,
+        envVars: envRows,
+        tools: ['chat','terminal','browser','code','cron'].filter(t=>document.getElementById('tool'+t.charAt(0).toUpperCase()+t.slice(1)).checked),
+      };
+    }
+
+    async function saveConfig(){
+      const data = getConfigData();
+      await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      flash('saved');
+    }
+    async function saveEnv(){
+      const data = getConfigData();
+      await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      flash('envSaved');
+    }
+    async function saveTools(){
+      const data = getConfigData();
+      await fetch('/api/config',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(data)});
+      alert('Tools configuration saved!');
+    }
+
+    // Load config from server
+    async function loadConfig() {
+      try {
+        const res = await fetch('/api/config');
+        const c = await res.json();
+        if (c.model) document.getElementById('model').value = c.model;
+        if (c.temperature !== undefined) { document.getElementById('temp').value = c.temperature; document.getElementById('tempVal').textContent = c.temperature; }
+        if (c.maxTokens) document.getElementById('maxTokens').value = c.maxTokens;
+        if (c.systemPrompt) document.getElementById('systemPrompt').value = c.systemPrompt;
+        if (c.envVars && c.envVars.length) {
+          document.getElementById('envVars').innerHTML = '';
+          c.envVars.forEach(r => addEnvRow(r.key, r.val));
+        }
+        if (c.tools) {
+          document.getElementById('toolChat').checked = c.tools.includes('chat');
+          document.getElementById('toolTerminal').checked = c.tools.includes('terminal');
+          document.getElementById('toolBrowser').checked = c.tools.includes('browser');
+          document.getElementById('toolCode').checked = c.tools.includes('code');
+          document.getElementById('toolCron').checked = c.tools.includes('cron');
+        }
+      } catch {}
+    }
+    loadConfig();
+  </script>
+</body>
+</html>

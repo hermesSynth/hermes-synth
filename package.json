@@ -1,0 +1,9 @@
+{
+  "name": "hermes-synth",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "dev": "npx wrangler pages dev ./public",
+    "deploy": "npx wrangler pages deploy ./public --project-name=hermes-synth"
+  }
+}

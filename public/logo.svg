@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="400" height="400">
+  <defs>
+    <linearGradient id="c1bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#0062ff"/>
+      <stop offset="100%" stop-color="#003ecf"/>
+    </linearGradient>
+  </defs>
+  <!-- Main circle -->
+  <circle cx="200" cy="200" r="180" fill="url(#c1bg)"/>
+  <!-- Subtle inner ring -->
+  <circle cx="200" cy="200" r="150" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1.5"/>
+  <!-- Wings (Hermes messenger wings) -->
+  <g fill="#ffffff">
+    <!-- Left wing feathers -->
+    <ellipse cx="152" cy="175" rx="52" ry="14" transform="rotate(-25 152 175)" opacity="0.9"/>
+    <ellipse cx="140" cy="158" rx="46" ry="11" transform="rotate(-35 140 158)" opacity="0.6"/>
+    <ellipse cx="132" cy="140" rx="38" ry="9" transform="rotate(-45 132 140)" opacity="0.35"/>
+    <!-- Right wing feathers -->
+    <ellipse cx="248" cy="175" rx="52" ry="14" transform="rotate(25 248 175)" opacity="0.9"/>
+    <ellipse cx="260" cy="158" rx="46" ry="11" transform="rotate(35 260 158)" opacity="0.6"/>
+    <ellipse cx="268" cy="140" rx="38" ry="9" transform="rotate(45 268 140)" opacity="0.35"/>
+  </g>
+  <!-- Center orb -->
+  <circle cx="200" cy="210" r="40" fill="none" stroke="#ffffff" stroke-width="5" opacity="0.9"/>
+  <circle cx="200" cy="210" r="18" fill="#ffffff" opacity="0.85"/>
+  <!-- Top spark -->
+  <circle cx="200" cy="100" r="6" fill="#ffffff" opacity="0.5"/>
+</svg>

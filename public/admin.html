@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 700px; margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; margin-bottom: 24px;
+    }
+    .badge {
+      background: #0033ff; color: #000; font-size: 11px; font-weight: 700;
+      padding: 6px 14px; border-radius: 20px; letter-spacing: 2px;
+    }
+    .menu-btn { color: #0f172a; text-decoration: none; font-size: 20px; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    h1 span { color: #0033ff; }
+    .sub { color: #475569; font-size: 13px; margin-bottom: 32px; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.06);
+      border-radius: 12px; padding: 20px; text-align: center;
+    }
+    .stat-num {
+      font-size: 36px; font-weight: 700; color: #0033ff;
+      line-height: 1;
+    }
+    .stat-label {
+      font-size: 11px; color: #475569; margin-top: 8px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-size: 11px; color: #475569; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px; font-weight: 600;
+    }
+    .table-card {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.06);
+      border-radius: 12px; padding: 16px; margin-bottom: 24px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; font-size: 11px; color: #475569; padding: 8px 12px;
+      border-bottom: 1px solid rgba(0,51,255,0.06);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    td {
+      padding: 10px 12px; font-size: 13px;
+      border-bottom: 1px solid rgba(0,51,255,0.03);
+    }
+    .badge-sm {
+      display: inline-block; padding: 3px 8px; border-radius: 6px;
+      font-size: 10px; font-weight: 700; letter-spacing: 1px;
+    }
+    .badge-agents { background: rgba(0,51,255,0.15); color: #0033ff; }
+    .badge-free { background: rgba(0,51,255,0.06); color: #475569; }
+    .badge-premium { background: rgba(0,51,255,0.2); color: #0033ff; }
+
+    .empty { text-align: center; padding: 24px; color: #475569; font-size: 13px; }
+    .loading { text-align: center; padding: 40px; color: #475569; }
+    .error { text-align: center; padding: 40px; color: #ef4444; }
+
+    .refresh-btn {
+      background: none; border: 1px solid rgba(0,51,255,0.1);
+      color: #475569; padding: 6px 14px; border-radius: 8px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { border-color: #0033ff; color: #0033ff; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="container">
+    <div class="topbar">
+      <div class="badge">ADMIN</div>
+      <a href="/analytics" style="color:#475569;text-decoration:none;font-size:12px;padding:6px 12px;border:1px solid rgba(0,51,255,0.1);border-radius:8px;transition:all 0.2s">Analytics</a>
+      <a href="/settings" class="menu-btn" title="Settings">☰</a>
+    </div>
+
+    <h1>User <span>Stats.</span></h1>
+    <p class="sub">Registration & agent activity overview</p>
+
+    <div id="content" class="loading">Loading data...</div>
+  </div>
+
+  <script>
+    async function loadData() {
+      const el = document.getElementById('content');
+      try {
+        const res = await fetch('/api/admin/users');
+        if (res.status === 401) { window.location.href = '/login'; return; }
+        if (res.status === 403) { el.innerHTML = '<div class="error">Admin access required.</div>'; return; }
+        const data = await res.json();
+
+        let html = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-num">${data.total_users}</div>
+              <div class="stat-label">Total Users</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${data.users_with_agents}</div>
+              <div class="stat-label">With Agents</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${data.users_only_registered}</div>
+              <div class="stat-label">Register Only</div>
+            </div>
+          </div>
+        `;
+
+        // Users with agents
+        html += '<div class="section-title">Users with Agents</div>';
+        if (data.agent_breakdown && data.agent_breakdown.length > 0) {
+          html += '<div class="table-card"><table><tr><th>User</th><th>Agents</th><th>Plan</th></tr>';
+          for (const u of data.agent_breakdown) {
+            const planClass = u.plan === 'premium' ? 'badge-premium' : 'badge-free';
+            html += `<tr>
+              <td>${u.user}</td>
+              <td><span class="badge-sm badge-agents">${u.agents} agent${u.agents > 1 ? 's' : ''}</span></td>
+              <td><span class="badge-sm ${planClass}">${u.plan.toUpperCase()}</span></td>
+            </tr>`;
+          }
+          html += '</table></div>';
+        } else {
+          html += '<div class="table-card"><div class="empty">No users with agents yet</div></div>';
+        }
+
+        // Register only stats
+        html += '<div class="section-title">Register Only</div>';
+        html += `<div class="table-card"><div style="text-align:center;padding:16px">
+          <div style="font-size:28px;font-weight:700;color:#0033ff">${data.users_only_registered}</div>
+          <div style="font-size:12px;color:#475569;margin-top:6px">users registered but haven't created an agent</div>
+        </div></div>`;
+
+        html += '<div style="text-align:center;margin-top:16px"><button class="refresh-btn" onclick="loadData()">↻ Refresh</button></div>';
+
+        el.innerHTML = html;
+      } catch (e) {
+        el.innerHTML = '<div class="error">Failed to load data.</div>';
+      }
+    }
+    loadData();
+  </script>
+</body>
+</html>

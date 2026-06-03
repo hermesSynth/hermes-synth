@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      -webkit-font-smoothing: antialiased;
+    }
+    
+    .container { position: relative; z-index: 1; width: 100%; max-width: 420px; padding: 0 20px; }
+    .logo { text-align: center; margin-bottom: 32px; }
+    .logo img { width: 48px; height: 48px; border-radius: 8px; }
+    .logo .name { font-size: 16px; font-weight: 700; margin-top: 12px; color: #0f172a; }
+    .card {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px;
+      padding: 36px 28px;
+      box-shadow: 0 2px 12px rgba(0,51,255,0.06);
+    }
+    .card h1 { font-size: 18px; font-weight: 700; text-align: center; margin-bottom: 4px; color: #0f172a; }
+    .card .sub { font-size: 13px; color: #475569; text-align: center; margin-bottom: 28px; }
+
+    .social-btns { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .social-btn {
+      display: flex; align-items: center; justify-content: center; gap: 10px;
+      width: 100%; padding: 12px 16px;
+      border-radius: 8px; border: 1px solid rgba(0,51,255,0.08);
+      background: transparent;
+      color: #0f172a; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; text-decoration: none;
+      font-family: inherit;
+    }
+    .social-btn:hover { background: #f0f4ff; border-color: rgba(0,51,255,0.3); }
+    .social-btn svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+    .divider { display: flex; align-items: center; gap: 12px; margin: 20px 0; }
+    .divider::before, .divider::after { content: ""; flex: 1; height: 1px; background: rgba(0,51,255,0.08); }
+    .divider span { font-size: 11px; color: #475569; text-transform: uppercase; letter-spacing: 1px; }
+
+    .field { margin-bottom: 16px; }
+    .field label {
+      display: block; font-size: 11px; color: #475569; margin-bottom: 6px;
+      font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+    }
+    .field input { 
+      width: 100%; background: #f8fafc;
+      border: 1px solid rgba(0,51,255,0.12); border-radius: 8px;
+      padding: 12px 14px; font-size: 13px; color: #0f172a;
+      outline: none; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .field input::placeholder { color: #94a3b8; }
+    .field input:focus { border-color: rgba(0,51,255,0.5); }
+    .error { color: #ef4444; font-size: 12px; margin-bottom: 12px; display: none; }
+    .success { color: #22c55e; font-size: 12px; margin-bottom: 12px; display: none; }
+    .btn {
+      width: 100%; background: #0033ff; color: #ffffff;
+      border: none; border-radius: 8px;
+      padding: 13px; font-size: 13px; font-weight: 700;
+      cursor: pointer; transition: all 0.2s;
+      font-family: inherit;
+    }
+    .btn:hover { background: #0022cc; }
+    .btn:disabled { opacity: 0.5; cursor: not-allowed; }
+    .code-input {
+      display: flex; gap: 8px; justify-content: center; margin-bottom: 16px;
+    }
+    .code-input input {
+      width: 48px; height: 56px; text-align: center;
+      font-size: 24px; font-weight: 700; font-family: 'JetBrains Mono', monospace;
+      border: 2px solid rgba(0,51,255,0.08); border-radius: 8px; outline: none;
+      transition: all 0.2s; color: #0033ff;
+      background: #ffffff;
+    }
+    .code-input input:focus { border-color: #0033ff; }
+    .step-hidden { display: none !important; }
+    .resend-link {
+      font-size: 12px; color: #475569; text-align: center; margin-top: 12px; cursor: pointer;
+    }
+    .resend-link a { color: #0033ff; text-decoration: none; font-weight: 600; cursor: pointer; }
+    .resend-link a:hover { text-decoration: underline; }
+    .verify-info { font-size: 13px; color: #475569; text-align: center; margin-bottom: 20px; }
+    .verify-info strong { color: #0f172a; }
+    .trial-info {
+      margin-top: 16px; padding: 14px; border-radius: 8px;
+      background: rgba(0,51,255,0.06); border: 1px solid rgba(0,51,255,0.15);
+    }
+    .trial-info p { font-size: 12px; color: #475569; }
+    .trial-info .highlight { color: #0033ff; font-weight: 600; margin-bottom: 4px; }
+    .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #475569; }
+    .footer a { color: #0033ff; text-decoration: none; font-weight: 600; }
+    .footer a:hover { text-decoration: underline; }
+    .bottom-links {
+      text-align: center; margin-top: 24px; padding-top: 20px;
+      border-top: 1px solid rgba(0,51,255,0.08);
+    }
+    .bottom-links a { font-size: 11px; color: #475569; text-decoration: none; margin: 0 8px; }
+    .bottom-links a:hover { color: #0033ff; }
+
+    @media (max-width: 480px) {
+      .container { padding: 0 16px; }
+      .card { padding: 28px 20px; }
+      .card h1 { font-size: 16px; }
+      .social-btn { padding: 10px 14px; font-size: 12px; }
+      .field input {  padding: 11px 12px; font-size: 14px; }
+      .btn { padding: 12px; font-size: 13px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="container">
+    <div class="logo">
+      <img src="/logo.png?v=4" alt="Hermes Synth">
+      <div class="name">Hermes Synth</div>
+    </div>
+    <div class="card">
+      <h1>Create your account</h1>
+      <p class="sub">Deploy AI agents in seconds</p>
+
+      <div class="social-btns">
+        <a href="/auth/google" class="social-btn">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.06 5.06 0 0 1-2.2 3.32v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.1z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Sign up with Google
+        </a>
+        <a href="/auth/github" class="social-btn">
+          <svg viewBox="0 0 24 24" fill="#0f172a"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/></svg>
+          Sign up with GitHub
+        </a>
+      </div>
+
+      <div class="divider"><span>or</span></div>
+
+      <form id="form" class="step" id="step1">
+        <div class="field">
+          <label for="name">Name</label>
+          <input id="name" type="text" placeholder="Your name" required>
+        </div>
+        <div class="field">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input id="password" type="password" placeholder="Min 6 characters" required minlength="6">
+        </div>
+        <div class="error" id="error"></div>
+        <button class="btn" type="submit" id="btn">Create Account →</button>
+      </form>
+
+      <div id="step2" class="step-hidden">
+        <p class="verify-info">We sent a 6-digit code to<br><strong id="verifyEmail"></strong></p>
+        <div class="code-input" id="codeInput">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]" autocomplete="one-time-code">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+          <input type="text" maxlength="1" inputmode="numeric" pattern="[0-9]">
+        </div>
+        <div class="error" id="error2"></div>
+        <div class="success" id="success2"></div>
+        <button class="btn" id="verifyBtn" onclick="verifyCode()">Verify & Create Account</button>
+        <div class="resend-link">Didn't receive it? <a id="resendLink" onclick="resendCode()">Resend code</a></div>
+      </div>
+      <div class="trial-info">
+        <p class="highlight">Free tier includes:</p>
+        <p>1 AI Agent · Persistent memory · All integrations · No credit card</p>
+      </div>
+      <div class="footer">
+        Have an account? <a href="/login">Sign in</a>
+      </div>
+    </div>
+    <div class="bottom-links">
+      <a href="/">Home</a>
+      <a href="https://github.com/hermesSynth/hermes-synth/blob/Main/LICENSE" target="_blank">Terms</a>
+      <a href="https://github.com/hermesSynth/hermes-synth/blob/Main/SECURITY.md" target="_blank">Privacy</a>
+    </div>
+  </div>
+  <script>
+    let pendingEmail = '';
+    const form = document.getElementById("form");
+    const errorEl = document.getElementById("error");
+    const btn = document.getElementById("btn");
+    const step2 = document.getElementById("step2");
+    const error2 = document.getElementById("error2");
+    const success2 = document.getElementById("success2");
+    const verifyBtn = document.getElementById("verifyBtn");
+    const codeInputs = document.querySelectorAll("#codeInput input");
+
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("error")) {
+      errorEl.textContent = decodeURIComponent(params.get("error"));
+      errorEl.style.display = "block";
+    }
+
+    codeInputs.forEach((inp, i) => {
+      inp.addEventListener("input", (e) => {
+        const v = e.target.value.replace(/\D/g, '');
+        e.target.value = v;
+        if (v && i < codeInputs.length - 1) codeInputs[i + 1].focus();
+        if (v && i === codeInputs.length - 1) verifyCode();
+      });
+      inp.addEventListener("keydown", (e) => {
+        if (e.key === "Backspace" && !e.target.value && i > 0) codeInputs[i - 1].focus();
+      });
+      inp.addEventListener("paste", (e) => {
+        e.preventDefault();
+        const paste = (e.clipboardData.getData("text") || "").replace(/\D/g, '').slice(0, 6);
+        paste.split('').forEach((ch, j) => { if (codeInputs[j]) codeInputs[j].value = ch; });
+        if (paste.length === 6) verifyCode();
+      });
+    });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      errorEl.style.display = "none";
+      btn.disabled = true;
+      btn.textContent = "Creating account...";
+      try {
+        const res = await fetch("/auth/register", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("name").value,
+            email: document.getElementById("email").value,
+            password: document.getElementById("password").value,
+          }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          window.location.href = "/welcome";
+        } else {
+          errorEl.textContent = data.error || "Registration failed";
+          errorEl.style.display = "block";
+        }
+      } catch {
+        errorEl.textContent = "Network error";
+        errorEl.style.display = "block";
+      } finally {
+        btn.disabled = false;
+        btn.textContent = "Create Account →";
+      }
+    });
+
+    async function verifyCode() {
+      const code = Array.from(codeInputs).map(i => i.value).join('');
+      if (code.length !== 6) {
+        error2.textContent = "Enter the full 6-digit code";
+        error2.style.display = "block";
+        return;
+      }
+      error2.style.display = "none";
+      verifyBtn.disabled = true;
+      verifyBtn.textContent = "Verifying...";
+      try {
+        const res = await fetch("/auth/verify-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email: pendingEmail, code }),
+        });
+        const data = await res.json();
+        if (res.ok) {
+          success2.textContent = "Verified! Redirecting...";
+          success2.style.display = "block";
+          setTimeout(() => { window.location.href = "/welcome"; }, 1000);
+        } else {
+          error2.textContent = data.error || "Verification failed";
+          error2.style.display = "block";
+          codeInputs.forEach(i => i.value = '');
+          codeInputs[0].focus();
+        }
+      } catch {
+        error2.textContent = "Network error";
+        error2.style.display = "block";
+      } finally {
+        verifyBtn.disabled = false;
+        verifyBtn.textContent = "Verify & Create Account";
+      }
+    }
+
+    async function resendCode() {
+      const link = document.getElementById("resendLink");
+      link.textContent = "Sending...";
+      link.style.pointerEvents = "none";
+      try {
+        const res = await fetch("/auth/send-code", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name: document.getElementById("name").value,
+            email: pendingEmail,
+            password: document.getElementById("password").value,
+          }),
+        });
+        if (res.ok) {
+          success2.textContent = "New code sent!";
+          success2.style.display = "block";
+          error2.style.display = "none";
+          setTimeout(() => { success2.style.display = "none"; }, 3000);
+        }
+      } catch {}
+      link.textContent = "Resend code";
+      link.style.pointerEvents = "auto";
+    }
+  </script>
+</body>
+</html>

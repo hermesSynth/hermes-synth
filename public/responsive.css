@@ -1,0 +1,366 @@
+/* Hermes Codex — Shared Responsive Styles */
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+body {
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* ============================================
+   MOBILE: max 480px
+   ============================================ */
+@media (max-width: 480px) {
+  /* Topbar */
+  .topbar {
+    padding: 10px 12px !important;
+  }
+  .topbar .badge {
+    font-size: 10px !important;
+    padding: 5px 10px !important;
+    letter-spacing: 1px !important;
+  }
+  .topbar .badge img {
+    width: 16px !important;
+    height: 16px !important;
+  }
+  .topbar .menu-btn {
+    width: 34px !important;
+    height: 34px !important;
+    font-size: 16px !important;
+  }
+
+  /* Bottom nav — scrollable on mobile */
+  .bottom-nav {
+    padding: 6px 0 10px !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    flex-wrap: nowrap !important;
+  }
+  .bottom-nav a, .bottom-nav .nav-item {
+    font-size: 8px !important;
+    padding: 4px 6px !important;
+    min-width: 52px !important;
+    flex-shrink: 0 !important;
+    white-space: nowrap !important;
+  }
+  .bottom-nav a svg, .bottom-nav img,
+  .bottom-nav a svg, .bottom-nav .nav-item svg {
+    width: 18px !important;
+    height: 18px !important;
+  }
+
+  /* Page content */
+  .page {
+    padding-bottom: 65px !important;
+  }
+
+  /* Hero sections */
+  .hero {
+    padding: 8px 12px 12px !important;
+  }
+  .hero h1 {
+    font-size: 24px !important;
+  }
+  .hero p {
+    font-size: 12px !important;
+  }
+
+  /* Chat specific */
+  .chat-card {
+    margin: 0 10px !important;
+    max-height: calc(100vh - 280px) !important;
+  }
+  .chat-area {
+    padding: 12px !important;
+  }
+  .msg {
+    max-width: 92% !important;
+    padding: 10px 12px !important;
+    font-size: 12px !important;
+  }
+  .input-area {
+    padding: 10px 10px !important;
+    gap: 6px !important;
+  }
+  .input-area input {
+    padding: 12px !important;
+    font-size: 14px !important;
+  }
+  .send-btn {
+    padding: 12px 14px !important;
+    font-size: 11px !important;
+  }
+  .model-bar {
+    margin: 0 10px 10px !important;
+  }
+  .model-bar select {
+    font-size: 11px !important;
+    padding: 8px 10px !important;
+  }
+
+  /* Cards general */
+  .card, .agent-card, .task-card, .skill-card, .cron-card,
+  .stat-card, .chart-card {
+    padding: 14px !important;
+    border-radius: 10px !important;
+  }
+
+  /* Section titles */
+  .section-title {
+    font-size: 14px !important;
+    padding: 0 12px !important;
+  }
+
+  /* Modals */
+  .modal-content, .modal, .modal-box {
+    width: 94vw !important;
+    max-width: 94vw !important;
+    margin: 8px auto !important;
+    padding: 18px 14px !important;
+    border-radius: 12px !important;
+  }
+  .modal-content h2, .modal h2, .modal-box h2 {
+    font-size: 16px !important;
+  }
+  .modal-content input, .modal input, .modal-box input,
+  .modal-content textarea, .modal textarea, .modal-box textarea,
+  .modal-content select, .modal select, .modal-box select {
+    font-size: 14px !important;
+    padding: 10px 12px !important;
+  }
+
+  /* Tables */
+  table {
+    font-size: 11px !important;
+    display: block !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+  th, td {
+    padding: 8px 6px !important;
+    white-space: nowrap;
+  }
+
+  /* Buttons */
+  .btn, button[type="submit"], .action-btn {
+    padding: 10px 16px !important;
+    font-size: 12px !important;
+  }
+
+  /* Inputs prevent zoom on iOS */
+  input[type="text"], input[type="email"], input[type="password"],
+  input[type="url"], input[type="number"], textarea, select {
+    font-size: 16px !important;
+  }
+
+  /* Grids → single column */
+  .grid, .cards-grid, .features-grid, .stats-grid,
+  .agents-grid, .tasks-list, .skills-list {
+    grid-template-columns: 1fr !important;
+    gap: 10px !important;
+  }
+
+  /* Settings sections */
+  .settings-section, .section-card {
+    margin: 8px 10px !important;
+    padding: 16px !important;
+  }
+
+  /* Editor */
+  .editor-area, .code-area {
+    font-size: 12px !important;
+  }
+  .editor-area textarea, .code-area textarea {
+    font-size: 13px !important;
+    padding: 12px !important;
+  }
+
+  /* Terminal */
+  .terminal, .term-output, #output, #term {
+    font-size: 11px !important;
+    padding: 12px !important;
+  }
+  .cmd-input, .term-input {
+    font-size: 13px !important;
+  }
+
+  /* Analytics charts */
+  .chart-container {
+    min-height: 200px !important;
+  }
+  canvas {
+    max-width: 100% !important;
+  }
+
+  /* Admin stats */
+  .stats-row, .stat-cards {
+    grid-template-columns: 1fr 1fr !important;
+    gap: 8px !important;
+  }
+
+  /* Wallet */
+  .balance-card {
+    padding: 20px 16px !important;
+  }
+
+  /* Browser */
+  .url-input-area {
+    flex-direction: column !important;
+    gap: 8px !important;
+  }
+  .url-input-area input {
+    width: 100% !important;
+  }
+
+  /* Profile & API Keys */
+  .profile-card, .key-card {
+    padding: 14px !important;
+    margin: 0 10px 10px !important;
+  }
+  .profile-header {
+    flex-direction: column !important;
+    text-align: center !important;
+    gap: 12px !important;
+  }
+  .profile-avatar {
+    width: 64px !important;
+    height: 64px !important;
+  }
+
+  /* Settings AI section */
+  .setting-value {
+    font-size: 11px !important;
+    max-width: 100px !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  .settings-group {
+    margin: 0 10px 12px !important;
+  }
+  .setting-item {
+    padding: 12px !important;
+    gap: 8px !important;
+  }
+  .setting-icon {
+    width: 32px !important;
+    height: 32px !important;
+    min-width: 32px !important;
+  }
+
+  /* Agent cards */
+  .agent-card {
+    margin: 0 10px 10px !important;
+  }
+
+  /* Detail view chat */
+  .detail-view .chat-area {
+    max-height: calc(100vh - 300px) !important;
+  }
+  .detail-actions {
+    flex-wrap: wrap !important;
+    gap: 6px !important;
+    padding: 0 10px !important;
+  }
+
+  /* Analytics */
+  .chart-card {
+    margin-left: 6px !important;
+    margin-right: 6px !important;
+  }
+
+  /* Touch feedback for all interactive items */
+  .setting-item:active,
+  .agent-card:active,
+  .btn:active,
+  button:active,
+  .bottom-nav a:active {
+    opacity: 0.7 !important;
+    transform: scale(0.98) !important;
+  }
+}
+
+/* ============================================
+   TABLET: 481px - 768px
+   ============================================ */
+@media (min-width: 481px) and (max-width: 768px) {
+  .topbar {
+    padding: 14px 16px !important;
+  }
+
+  .bottom-nav {
+    padding: 8px 4px !important;
+  }
+  .bottom-nav a, .bottom-nav .nav-item {
+    font-size: 9px !important;
+    padding: 4px 8px !important;
+  }
+
+  .hero h1 {
+    font-size: 28px !important;
+  }
+
+  .chat-card {
+    margin: 0 16px !important;
+  }
+
+  .grid, .cards-grid, .features-grid, .stats-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+
+  .modal-content, .modal, .modal-box {
+    width: 80vw !important;
+    max-width: 80vw !important;
+  }
+
+  .stats-row, .stat-cards {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* ============================================
+   DESKTOP: 769px+
+   ============================================ */
+@media (min-width: 769px) {
+  .page {
+    max-width: 900px !important;
+    margin: 0 auto !important;
+  }
+  .bottom-nav {
+    max-width: 700px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    border-radius: 12px 12px 0 0 !important;
+  }
+
+  .input-area {
+    max-width: 900px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+  }
+}
+
+/* ============================================
+   LARGE DESKTOP: 1200px+
+   ============================================ */
+@media (min-width: 1200px) {
+  .page {
+    max-width: 1000px !important;
+  }
+}
+
+/* ============================================
+   UTILITY: Safe area for notched phones
+   ============================================ */
+@supports (padding-bottom: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: calc(14px + env(safe-area-inset-bottom)) !important;
+  }
+  .input-area {
+    bottom: calc(56px + env(safe-area-inset-bottom)) !important;
+  }
+}

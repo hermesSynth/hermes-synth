@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Terminal — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #0a0a0f; color: #e2e8f0; min-height: 100vh; }
+    .page { max-width: 800px; margin: 0 auto; padding: 0 20px; }
+    .hero { padding: 32px 0 20px; }
+    .hero h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    .hero h1 span { color: #a78bfa; }
+    .hero p { font-size: 13px; color: #64748b; margin-top: 6px; }
+
+    .terminal {
+      overflow-y: auto; padding: 16px 20px; padding-bottom: 80px;
+      border: 1px solid rgba(255,255,255,0.06); border-radius: 12px;
+      background: #111118; min-height: calc(100vh - 220px);
+    }
+    .line { margin-bottom: 4px; white-space: pre-wrap; word-break: break-all; font-size: 13px; line-height: 1.5; }
+    .line.prompt { color: #a78bfa; }
+    .line.output { color: #94a3b8; }
+    .line.error { color: #f87171; }
+    .line.system { color: #475569; font-style: italic; }
+    .input-bar {
+      max-width: 800px; margin: 12px auto 0; padding: 12px 20px;
+      background: #111118; border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 10px; display: flex; gap: 8px; align-items: center;
+    }
+    .prompt-label { color: #a78bfa; font-size: 13px; white-space: nowrap; font-weight: 600; }
+    .input-bar input {
+      flex: 1; background: transparent; border: none; color: #e2e8f0;
+      font-family: inherit; font-size: 13px; outline: none;
+    }
+    .input-bar input::placeholder { color: #475569; }
+    @media (max-width: 768px) {
+      .page { padding: 0 12px; }
+      .hero h1 { font-size: 22px; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>Run <span>Commands.</span></h1>
+      <p>Execute commands on your agent environment.</p>
+    </div>
+  <div class="terminal" id="terminal">
+    <div class="line system">Hermes Synth Terminal v0.14.0 — Connected to server</div>
+    <div class="line system">Working directory: /opt/data/workspace</div>
+    <div class="line system">Type commands below. Use ↑/↓ for history.</div>
+  </div>
+  </div>
+  <div class="input-bar">
+    <span class="prompt-label">synth $</span>
+    <input type="text" id="cmdInput" placeholder="Enter command..." autofocus>
+  </div>
+
+<script src="/sidebar.js?v=2"></script>
+<script>
+    const term = document.getElementById('terminal');
+    const input = document.getElementById('cmdInput');
+    const history = []; let histIdx = -1;
+
+    function addLine(text, cls) {
+      const div = document.createElement('div');
+      div.className = 'line ' + cls;
+      div.textContent = text;
+      term.appendChild(div);
+      term.scrollTop = term.scrollHeight;
+    }
+
+    input.addEventListener('keydown', async (e) => {
+      if (e.key === 'ArrowUp') { e.preventDefault(); if (histIdx < history.length-1) { histIdx++; input.value = history[history.length-1-histIdx]; } }
+      if (e.key === 'ArrowDown') { e.preventDefault(); if (histIdx > 0) { histIdx--; input.value = history[history.length-1-histIdx]; } else { histIdx = -1; input.value = ''; } }
+      if (e.key !== 'Enter') return;
+      const cmd = input.value.trim();
+      if (!cmd) return;
+      history.push(cmd); histIdx = -1;
+      addLine('codex $ ' + cmd, 'prompt');
+      input.value = ''; input.disabled = true;
+      if (cmd === 'clear') { term.innerHTML = ''; input.disabled = false; return; }
+      try {
+        const res = await fetch('/api/terminal', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({ command: cmd }) });
+        const data = await res.json();
+        if (data.error) { addLine(data.error, 'error'); }
+        else { addLine(data.output || '(no output)', data.exitCode === 0 ? 'output' : 'error'); }
+      } catch(e) { addLine('Connection error: ' + e.message, 'error'); }
+      input.disabled = false; input.focus();
+    });
+  </script>
+</body>
+</html>

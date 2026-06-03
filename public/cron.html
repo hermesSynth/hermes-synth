@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cron Jobs — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    
+    .page { position: relative; z-index: 1; padding: 0 0 80px 0; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 24px;
+    }
+    .topbar .badge {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.3);
+      color: #0033ff;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 4px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .topbar .badge img { width: 20px; height: 20px; }
+    .topbar .menu-btn {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a;
+      width: 40px; height: 40px; border-radius: 8px;
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 18px; text-decoration: none;
+    }
+    .hero { padding: 8px 24px 20px; }
+    .hero h1 {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px; font-weight: 400; line-height: 1.15; color: #0f172a;
+    }
+    .hero h1 span { color: #0033ff; }
+    .hero p {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: rgba(15,23,42,0.5); margin-top: 8px;
+    }
+    .card {
+      margin: 0 24px 16px;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      background: #ffffff;
+    }
+    .card h3 {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: rgba(15,23,42,0.5); margin-bottom: 16px;
+    }
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: rgba(15,23,42,0.5); margin-bottom: 10px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', 'SF Mono', Menlo, monospace;
+      color: #0f172a; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(0,51,255,0.5); }
+    .field input::placeholder, .field textarea::placeholder { color: rgba(15,23,42,0.3); }
+    .field select option { background: #ffffff; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: #0033ff;
+      color: #ffffff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      color: #0f172a; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .btn-secondary:hover { border-color: rgba(0,51,255,0.3); }
+    .btn-danger {
+      padding: 10px 20px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .item-card {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1);
+      border-radius: 8px; padding: 16px;
+      margin-bottom: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .item-card:hover { border-color: rgba(0,51,255,0.3); background: rgba(0,51,255,0.05); }
+    .item-card .name { font-size: 14px; font-weight: 600; color: #0f172a; }
+    .item-card .desc { font-size: 12px; color: rgba(15,23,42,0.5); margin-top: 4px; }
+    .item-card .meta { font-size: 10px; color: rgba(15,23,42,0.4); margin-top: 8px; display: flex; gap: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-sm {
+      font-size: 9px; padding: 2px 8px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .badge-sm.active { background: rgba(52,211,153,0.15); color: #34d399; }
+    .badge-sm.paused { background: #ffffff; color: #0033ff; }
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: rgba(15,23,42,0.4);
+    }
+    .empty-state h3 { font-size: 16px; color: rgba(15,23,42,0.5); margin-bottom: 8px; font-family: Georgia, serif; }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.08);
+      border-radius: 12px; padding: 24px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-family: Georgia, serif; font-size: 20px; margin-bottom: 20px; }
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff;
+      border-top: 1px solid rgba(0,51,255,0.08);
+      display: flex; justify-content: space-around;
+      padding: 10px 0 14px; z-index: 10;
+    }
+    .bottom-nav a {
+      display: flex; flex-direction: column; align-items: center; gap: 4px;
+      text-decoration: none; color: rgba(15,23,42,0.4);
+      font-size: 10px; font-family: 'JetBrains Mono', monospace;
+      transition: color 0.2s;
+    }
+    .bottom-nav a:hover, .bottom-nav a.active { color: #0033ff; }
+    .bottom-nav img { width: 22px; height: 22px; }
+    @media (max-width: 480px) {
+      .hero { padding: 8px 12px 12px; }
+      .hero h1 { font-size: 22px; }
+      .hero p { font-size: 12px; }
+      .chat-card { margin: 0 8px; }
+      .input-area { padding: 8px 10px; }
+    }
+    @media (min-width: 768px) {
+      .page { max-width: 700px; margin: 0 auto; }
+      .bottom-nav { max-width: 600px; left: 50%; transform: translateX(-50%); border-radius: 12px 12px 0 0; }
+    }
+
+    .create-form { margin: 0 24px 16px; }
+    .form-row { display: flex; gap: 8px; margin-bottom: 8px; }
+    .form-row input, .form-row select {
+      flex: 1; background: #ffffff; border: 1px solid rgba(0,51,255,0.12);
+      border-radius: 8px; padding: 10px 12px; color: #0f172a; font-size: 13px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .form-row select option { background: #ffffff; }
+    .btn { padding: 10px 20px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+    .btn-sm { padding: 6px 12px; font-size: 11px; }
+    .danger { background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.3); color: #ef4444; }
+    .job-card {
+      margin: 0 24px 10px; background: #ffffff;
+      border: 1px solid rgba(0,51,255,0.1); border-radius: 8px; padding: 14px;
+    }
+    .job-card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+    .job-card .prompt { font-size: 12px; color: rgba(15,23,42,0.5); }
+    .job-card .actions { display: flex; gap: 6px; }
+    .job-card .history { font-size: 11px; color: rgba(15,23,42,0.4); margin-top: 8px; }
+    .job-card .history-item { margin-top: 4px; }
+    .empty { text-align: center; padding: 40px 24px; color: rgba(15,23,42,0.4); }
+    .spacer { height: 80px; }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="badge"><img src="/logo.png?v=4" alt="HC">CRON</div>
+      <a href="/chat" class="menu-btn" title="Dashboard">☰</a>
+    </div>
+    <div class="hero">
+      <h1>Scheduled <span>Tasks.</span></h1>
+      <p>Set up recurring jobs for your agents.</p>
+    </div>
+    </div>
+  <div class="card">
+    <div class="create-form">
+      <h3>New Scheduled Job</h3>
+      <div class="form-row">
+        <input type="text" id="jobName" placeholder="Job name (e.g. Daily Report)">
+        <select id="jobInterval">
+          <option value="5">Every 5 min</option>
+          <option value="15">Every 15 min</option>
+          <option value="30">Every 30 min</option>
+          <option value="60" selected>Every hour</option>
+          <option value="360">Every 6 hours</option>
+          <option value="720">Every 12 hours</option>
+          <option value="1440">Daily</option>
+        </select>
+      </div>
+      <div class="form-row">
+        <textarea id="jobPrompt" placeholder="AI prompt to execute on schedule...&#10;e.g. &quot;Check if Bitcoin price is above $100k and summarize the market&quot;"></textarea>
+      </div>
+      <button class="btn" onclick="createJob()">Create Job</button>
+    </div>
+    <div id="jobList"></div>
+  </div>
+  <div class="spacer"></div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="/chat" class="active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <a href="/agents"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="4"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>Agents</a>
+    <a href="/editor"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Editor</a>
+    <a href="/terminal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Terminal</a>
+    <a href="/mcp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>MCP</a>
+    <a href="/settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>
+    <a href="/profile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+  </nav>
+
+<script>
+    function esc(s) { return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+    function ago(ts) { if(!ts) return 'never'; const d=Date.now()-ts; if(d<60000) return 'just now'; if(d<3600000) return Math.floor(d/60000)+'m ago'; if(d<86400000) return Math.floor(d/3600000)+'h ago'; return Math.floor(d/86400000)+'d ago'; }
+    async function loadJobs() {
+      const res = await fetch('/api/cron'); const { jobs } = await res.json();
+      const el = document.getElementById('jobList');
+      if (!jobs || !jobs.length) { el.innerHTML = '<div class="empty"><p>No scheduled jobs yet. Create one above.</p></div>'; return; }
+      el.innerHTML = jobs.map(j => `
+        <div class="job-card">
+          <div class="top"><span class="name">${esc(j.name)}</span><span class="badge ${j.enabled?'on':'off'}">${j.enabled?'ACTIVE':'PAUSED'}</span></div>
+          <div class="meta">Every ${j.intervalMinutes} min · Last run: ${ago(j.lastRun)} · Created: ${ago(j.createdAt)}</div>
+          <div class="prompt">${esc(j.prompt)}</div>
+          ${j.history && j.history.length ? '<div class="history">' + j.history.slice(-3).reverse().map(h => `<div class="history-item"><strong>${ago(h.ts)}:</strong> ${esc(h.result?.slice(0,200))}</div>`).join('') + '</div>' : ''}
+          <div class="actions">
+            <button class="btn-sm" onclick="toggleJob('${j.id}')">${j.enabled?'Pause':'Resume'}</button>
+            <button class="btn-sm danger" onclick="deleteJob('${j.id}')">Delete</button>
+          </div>
+        
+      `).join('');
+    }
+    async function createJob() {
+      const name = document.getElementById('jobName').value.trim();
+      const prompt = document.getElementById('jobPrompt').value.trim();
+      const intervalMinutes = parseInt(document.getElementById('jobInterval').value);
+      if (!name || !prompt) return alert('Name and prompt required');
+      await fetch('/api/cron', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({name,prompt,intervalMinutes}) });
+      document.getElementById('jobName').value = ''; document.getElementById('jobPrompt').value = '';
+      loadJobs();
+    }
+    async function toggleJob(id) { await fetch('/api/cron/toggle', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id}) }); loadJobs(); }
+    async function deleteJob(id) { if(!confirm('Delete this job?')) return; await fetch('/api/cron/delete', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({id}) }); loadJobs(); }
+    loadJobs(); setInterval(loadJobs, 30000);
+  </script>
+</body>
+</html>

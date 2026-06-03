@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Agents — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="theme-color" content="#0a0a0f">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: 'JetBrains Mono', monospace; background: #0a0a0f; color: #e2e8f0; min-height: 100vh; }
+    .page { max-width: 800px; margin: 0 auto; padding: 0 20px 40px; }
+    .hero { padding: 32px 0 20px; }
+    .hero h1 { font-size: 28px; font-weight: 700; color: #fff; }
+    .hero h1 span { color: #a78bfa; }
+    .hero p { font-size: 13px; color: #64748b; margin-top: 6px; }
+    .card {
+      margin: 0 0 16px;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px;
+      background: #111118;
+    }
+    .card h3 {
+      font-size: 11px; letter-spacing: 2px; text-transform: uppercase;
+      color: #64748b; margin-bottom: 16px;
+    }
+    .field { margin-bottom: 20px; }
+    .field label {
+      display: block; font-size: 11px; letter-spacing: 2px;
+      text-transform: uppercase; color: #64748b; margin-bottom: 10px;
+    }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 14px 16px;
+      font-size: 14px;
+      font-family: 'JetBrains Mono', monospace;
+      color: #e2e8f0; outline: none;
+      transition: border-color 0.2s;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: rgba(167,139,250,0.4); }
+    .field input::placeholder, .field textarea::placeholder { color: #475569; }
+    .field select option { background: #0a0a0f; }
+    .field textarea { min-height: 80px; resize: vertical; }
+    .btn-primary {
+      width: 100%; padding: 14px;
+      background: #a78bfa;
+      color: #ffffff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      cursor: pointer; transition: opacity 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .btn-primary:hover { opacity: 0.9; }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-secondary {
+      padding: 10px 20px;
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.08);
+      color: #e2e8f0; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.2s;
+      font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+    .btn-secondary:hover { border-color: rgba(167,139,250,0.3); }
+    .btn-danger {
+      padding: 10px 20px;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.3);
+      color: #ef4444; border-radius: 8px;
+      font-size: 12px; font-weight: 600;
+      cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .item-card {
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 16px;
+      margin-bottom: 10px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .item-card:hover { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+    .item-card .name { font-size: 14px; font-weight: 600; color: #e2e8f0; }
+    .item-card .desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .item-card .meta { font-size: 10px; color: #475569; margin-top: 8px; display: flex; gap: 12px; letter-spacing: 1px; text-transform: uppercase; }
+    .badge-sm {
+      font-size: 9px; padding: 2px 8px; border-radius: 3px;
+      font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .badge-sm.active { background: rgba(52,211,153,0.15); color: #34d399; }
+    .badge-sm.paused { background: #111118; color: #a78bfa; }
+    .empty-state {
+      text-align: center; padding: 40px 20px; color: #475569;
+    }
+    .empty-state h3 { font-size: 16px; color: #64748b; margin-bottom: 8px; font-family: Georgia, serif; }
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.85); z-index: 100;
+      align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay.show { display: flex; }
+    .modal {
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px; padding: 24px;
+      width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto;
+    }
+    .modal h2 { font-size: 20px; font-weight: 700; margin-bottom: 20px; color: #fff; }
+    @media (max-width: 768px) {
+      .page { padding: 0 12px 40px; }
+      .hero h1 { font-size: 22px; }
+    }
+
+    .content { padding: 0; }
+    .create-btn {
+      width: 100%; padding: 14px;
+      background: #a78bfa;
+      color: #ffffff; border: none; border-radius: 8px;
+      font-size: 13px; font-weight: 700; letter-spacing: 2px;
+      text-transform: uppercase; cursor: pointer;
+      font-family: 'JetBrains Mono', monospace;
+      margin-bottom: 16px; transition: opacity 0.2s;
+    }
+    .create-btn:hover { opacity: 0.9; }
+    .agent-card {
+      background: #111118;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 16px; margin-bottom: 10px;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .agent-card:hover { border-color: rgba(167,139,250,0.3); background: rgba(167,139,250,0.08); }
+    .agent-card .name { font-size: 14px; font-weight: 600; }
+    .agent-card .desc { font-size: 12px; color: #64748b; margin-top: 4px; }
+    .agent-card .meta { font-size: 10px; color: #475569; margin-top: 8px; display: flex; gap: 12px; flex-wrap: wrap; }
+    .badge { font-size: 9px; padding: 2px 8px; border-radius: 3px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+    .badge.active { background: rgba(52,211,153,0.15); color: #34d399; }
+    .badge.paused { background: #111118; color: #a78bfa; }
+    .empty { text-align: center; padding: 40px 20px; color: #475569; }
+    .empty h3 { font-size: 16px; color: #64748b; margin-bottom: 8px; font-family: Georgia, serif; }
+    .modal-overlay { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.85); z-index: 100; align-items: center; justify-content: center; padding: 16px; }
+    .modal-overlay.show { display: flex; }
+    .modal { background: #0a0a0f; border: 1px solid rgba(255,255,255,0.06); border-radius: 12px; padding: 24px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; }
+    .modal h2 { font-family: Georgia, serif; font-size: 20px; margin-bottom: 20px; }
+    .form-group { margin-bottom: 14px; }
+    .form-group label { display: block; font-size: 11px; color: #64748b; margin-bottom: 6px; text-transform: uppercase; letter-spacing: 1.5px; }
+    .form-group input, .form-group textarea, .form-group select {
+      width: 100%; background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 12px 14px; color: #e2e8f0; font-size: 14px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .form-group input:focus, .form-group textarea:focus { border-color: rgba(167,139,250,0.4); }
+    .form-group textarea { min-height: 80px; resize: vertical; }
+    .form-group select option { background: #0a0a0f; }
+    .tools-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .tool-check {
+      display: flex; align-items: center; gap: 8px; padding: 10px;
+      background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; cursor: pointer; font-size: 12px;
+      letter-spacing: 1px; text-transform: uppercase; transition: all 0.2s;
+    }
+    .tool-check.selected { border-color: rgba(167,139,250,0.4); background: rgba(167,139,250,0.08); color: #a78bfa; }
+    .modal-actions { display: flex; gap: 10px; margin-top: 16px; }
+    .modal-actions button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: 'JetBrains Mono', monospace; letter-spacing: 1px; text-transform: uppercase; }
+    .detail-view { display: none; }
+    .detail-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+    .detail-header h2 { font-family: Georgia, serif; font-size: 18px; }
+    .detail-actions { display: flex; gap: 8px; margin-bottom: 16px; }
+    .detail-actions button { padding: 8px 14px; border: none; border-radius: 8px; font-size: 12px; font-weight: 600; cursor: pointer; font-family: 'JetBrains Mono', monospace; }
+    .chat-area {
+      background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 16px; min-height: 300px; max-height: 50vh;
+      overflow-y: auto; margin-bottom: 12px;
+    }
+    .chat-msg { margin-bottom: 12px; }
+    .chat-msg .role { font-size: 10px; font-weight: 600; text-transform: uppercase; margin-bottom: 2px; letter-spacing: 1.5px; }
+    .chat-msg .role.user { color: #a78bfa; }
+    .chat-msg .role.assistant { color: #34d399; }
+    .chat-msg .text { font-size: 13px; line-height: 1.5; white-space: pre-wrap; word-break: break-word; }
+    .chat-input { display: flex; gap: 8px; }
+    .chat-input input {
+      flex: 1; background: #111118; border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px; padding: 12px; color: #e2e8f0; font-size: 14px;
+      font-family: 'JetBrains Mono', monospace; outline: none;
+    }
+    .chat-input input:focus { border-color: rgba(167,139,250,0.4); }
+    .chat-input button {
+      background: #a78bfa; color: #ffffff;
+      border: none; border-radius: 8px; padding: 12px 20px; font-weight: 700;
+      cursor: pointer; font-family: 'JetBrains Mono', monospace;
+      letter-spacing: 1px; text-transform: uppercase;
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+    <div class="hero">
+      <h1>Manage Your <span>Agents.</span></h1>
+      <p>Create, configure, and chat with your AI agents.</p>
+    </div>
+    <div style="padding: 0 24px 12px;">
+      <div style="font-size: 13px; font-weight: 700; color: #475569; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 12px;">Quick Templates</div>
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 16px;" id="templateGrid">
+        <button class="template-btn" onclick="useTemplate('trading')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">📈</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Trading Bot</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">DeFi swaps & analysis</div>
+        </button>
+        <button class="template-btn" onclick="useTemplate('writer')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">✍️</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Content Writer</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Blog, social, copy</div>
+        </button>
+        <button class="template-btn" onclick="useTemplate('coder')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">💻</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Code Assistant</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Debug, review, write</div>
+        </button>
+        <button class="template-btn" onclick="useTemplate('research')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">🔬</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Research Agent</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Analysis & summaries</div>
+        </button>
+        <button class="template-btn" onclick="useTemplate('support')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">🎧</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Support Agent</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Customer help desk</div>
+        </button>
+        <button class="template-btn" onclick="useTemplate('data')" style="background: #111118; border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 14px 12px; cursor: pointer; text-align: left; font-family: inherit; transition: all 0.2s;">
+          <div style="font-size: 20px; margin-bottom: 6px;">📊</div>
+          <div style="font-size: 12px; font-weight: 700; color: #e2e8f0;">Data Analyst</div>
+          <div style="font-size: 10px; color: #64748b; margin-top: 2px;">Charts & insights</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="card" id="listView">
+    <button class="create-btn" onclick="showCreate()">+ Create Agent</button>
+    <div id="agentList"></div>
+  </div>
+
+  <div class="content detail-view" id="detailView">
+    <div class="detail-header">
+      <h2 id="detailName"></h2>
+      <button class="btn-secondary" style="padding:6px 12px;border:none;border-radius:6px;font-size:12px;cursor:pointer;background:#f0f4ff;color:#0f172a;border:1px solid rgba(0,51,255,0.15)" onclick="backToList()">Back</button>
+    </div>
+    <div class="detail-actions">
+      <button class="btn-secondary" style="background:#f0f4ff;color:#0033ff;border:1px solid rgba(0,51,255,0.15);padding:8px 14px;border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit" onclick="showEdit()">Edit</button>
+      <div id="agentModelInfo" style="flex:1;text-align:center;font-size:11px;color:#475569;padding:8px 0"></div>
+      <button class="btn-danger" style="padding:8px 14px;border:none;border-radius:8px;font-size:12px;cursor:pointer;background:#fee2e2;color:#dc2626" onclick="deleteAgent()">Delete</button>
+    </div>
+    <div class="chat-area" id="chatArea"></div>
+    <div class="chat-input">
+      <input type="text" id="chatMsg" placeholder="Message agent..." onkeydown="if(event.key==='Enter')sendMsg()">
+      <button onclick="sendMsg()">Send</button>
+    </div>
+  </div>
+
+  <!-- Create/Edit Modal -->
+  <div class="modal-overlay" id="modal">
+    <div class="modal">
+      <h2 id="modalTitle">Create Agent</h2>
+      <div class="form-group">
+        <label>Agent Name</label>
+        <input type="text" id="agentName" placeholder="e.g. Research Assistant">
+      </div>
+      <div class="form-group">
+        <label>Description</label>
+        <input type="text" id="agentDesc" placeholder="What does this agent do?">
+      </div>
+      <div class="form-group">
+        <label>System Prompt</label>
+        <textarea id="agentPrompt" placeholder="You are a helpful AI assistant that..."></textarea>
+      </div>
+      <div class="form-group">
+        <label>AI Model</label>
+        <select id="agentModel">
+          <option value="llama-3.3-70b">Llama 3.3 70B (Venice)</option>
+          <option value="llama-3.1-405b">Llama 3.1 405B (Venice)</option>
+          <option value="deepseek-r1-671b">DeepSeek R1 671B (Venice)</option>
+          <option value="qwen-2.5-vl">Qwen 2.5 VL (Venice)</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Tools</label>
+        <div class="tools-grid" id="toolsGrid">
+          <div class="tool-check selected" data-tool="chat" onclick="toggleTool(this)">Chat</div>
+          <div class="tool-check selected" data-tool="tasks" onclick="toggleTool(this)">Tasks</div>
+          <div class="tool-check selected" data-tool="browser" onclick="toggleTool(this)">Browser</div>
+          <div class="tool-check selected" data-tool="terminal" onclick="toggleTool(this)">Terminal</div>
+          <div class="tool-check" data-tool="cron" onclick="toggleTool(this)">Cron</div>
+          <div class="tool-check" data-tool="skills" onclick="toggleTool(this)">Skills</div>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="closeModal()">Cancel</button>
+        <button class="btn-primary" id="modalSubmit" onclick="submitAgent()">Create</button>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <script src="/sidebar.js?v=2"></script>
+<script>
+    let agents = [];
+    let currentAgent = null;
+    let editMode = false;
+
+    async function loadAgents() {
+      try {
+        const r = await fetch('/api/agents');
+        const d = await r.json();
+        agents = (d.agents || []).map(a => {
+          if (typeof a.tools === 'string') try { a.tools = JSON.parse(a.tools); } catch { a.tools = []; }
+          return a;
+        });
+        renderList();
+      } catch {}
+    }
+
+    function renderList() {
+      const el = document.getElementById('agentList');
+      if (!agents.length) {
+        el.innerHTML = '<div class="empty"><h3>No Agents Yet</h3><p>Create your first AI agent to get started.</p></div>';
+        return;
+      }
+      el.innerHTML = agents.map(a => `
+        <div class="agent-card" onclick="openAgent('${a.id}')">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div class="name">${esc(a.name)}</div>
+            <span class="badge ${(a.status || 'active') === 'active' ? 'active' : 'paused'}">${a.status || 'active'}</span>
+          </div>
+          ${a.description ? `<div class="desc">${esc(a.description)}</div>` : ''}
+          <div class="meta">
+            <span>${a.model || 'llama-3.3-70b'}</span>
+            <span>${timeAgo(a.created_at)}</span>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:10px">
+            <button onclick="event.stopPropagation();openAgent('${a.id}')" style="flex:1;padding:8px;background:#0033ff;color:#fff;border:none;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;font-family:inherit;letter-spacing:0.5px">Chat</button>
+            <button onclick="event.stopPropagation();quickEdit('${a.id}')" style="padding:8px 14px;background:transparent;border:1px solid rgba(0,51,255,0.15);border-radius:8px;font-size:12px;cursor:pointer;font-family:inherit;color:#475569">Edit</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    const TEMPLATES = {
+      trading: { name: 'Trading Bot', desc: 'Autonomous DeFi trading agent — swaps, portfolio analysis, market alerts', prompt: 'You are a DeFi trading assistant on Base Network. You can analyze token prices, execute swaps via Uniswap, track portfolio performance, and provide market insights. Always prioritize risk management and provide clear reasoning for trade suggestions. Never execute trades without user confirmation.', tools: ['chat','tasks','browser'] },
+      writer: { name: 'Content Writer', desc: 'Blog posts, social media, marketing copy, and technical writing', prompt: 'You are a professional content writer. You excel at crafting engaging blog posts, social media content, email newsletters, and marketing copy. Adapt your tone and style to the target audience. Always provide well-structured, grammatically correct content. Ask about target audience and goals before writing.', tools: ['chat','tasks'] },
+      coder: { name: 'Code Assistant', desc: 'Debug, review code, write functions, explain concepts', prompt: 'You are an expert software engineer and code assistant. You can write, debug, review, and explain code in any programming language. Follow best practices, write clean and documented code, and explain your reasoning. When reviewing code, identify bugs, security issues, and performance improvements.', tools: ['chat','tasks','terminal','browser'] },
+      research: { name: 'Research Agent', desc: 'Deep research, data analysis, report summaries', prompt: 'You are a research analyst assistant. You excel at gathering information, analyzing data, synthesizing findings, and creating comprehensive reports. Always cite sources when possible, present balanced viewpoints, and highlight key insights. Structure your responses with clear headings and bullet points.', tools: ['chat','tasks','browser'] },
+      support: { name: 'Support Agent', desc: 'Customer support, FAQ handling, ticket management', prompt: 'You are a customer support specialist. You handle inquiries with empathy, patience, and professionalism. Provide clear and helpful responses, escalate complex issues when needed, and always follow up to ensure customer satisfaction. Use a friendly but professional tone.', tools: ['chat','tasks'] },
+      data: { name: 'Data Analyst', desc: 'Data visualization, statistics, trend analysis', prompt: 'You are a data analyst assistant. You can analyze datasets, create visualizations, identify trends and patterns, perform statistical analysis, and generate actionable insights. Present data clearly with charts descriptions, tables, and summaries. Always validate data quality before analysis.', tools: ['chat','tasks','browser'] },
+    };
+
+    function useTemplate(key) {
+      const t = TEMPLATES[key];
+      if (!t) return;
+      editMode = false;
+      document.getElementById('modalTitle').textContent = 'Create Agent from Template';
+      document.getElementById('modalSubmit').textContent = 'Create';
+      document.getElementById('agentName').value = t.name;
+      document.getElementById('agentDesc').value = t.desc;
+      document.getElementById('agentPrompt').value = t.prompt;
+      document.getElementById('agentModel').value = 'llama-3.3-70b';
+      document.querySelectorAll('.tool-check').forEach(tc => {
+        tc.classList.toggle('selected', t.tools.includes(tc.dataset.tool));
+      });
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function quickEdit(id) {
+      currentAgent = agents.find(a => a.id === id);
+      if (!currentAgent) return;
+      showEdit();
+    }
+
+    function showCreate() {
+      editMode = false;
+      document.getElementById('modalTitle').textContent = 'Create Agent';
+      document.getElementById('modalSubmit').textContent = 'Create';
+      document.getElementById('agentName').value = '';
+      document.getElementById('agentDesc').value = '';
+      document.getElementById('agentPrompt').value = '';
+      document.getElementById('agentModel').value = 'llama-3.3-70b';
+      document.querySelectorAll('.tool-check').forEach(t => {
+        t.classList.toggle('selected', ['chat','tasks','browser','terminal'].includes(t.dataset.tool));
+      });
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function showEdit() {
+      if (!currentAgent) return;
+      editMode = true;
+      document.getElementById('modalTitle').textContent = 'Edit Agent';
+      document.getElementById('modalSubmit').textContent = 'Save';
+      document.getElementById('agentName').value = currentAgent.name;
+      document.getElementById('agentDesc').value = currentAgent.description || '';
+      document.getElementById('agentPrompt').value = currentAgent.system_prompt || currentAgent.systemPrompt || '';
+      document.getElementById('agentModel').value = currentAgent.model;
+      document.querySelectorAll('.tool-check').forEach(t => {
+        t.classList.toggle('selected', (currentAgent.tools || []).includes(t.dataset.tool));
+      });
+      document.getElementById('modal').classList.add('show');
+    }
+
+    function closeModal() { document.getElementById('modal').classList.remove('show'); }
+
+    function toggleTool(el) { el.classList.toggle('selected'); }
+
+    async function submitAgent() {
+      const name = document.getElementById('agentName').value.trim();
+      if (!name) return alert('Agent name required');
+      const tools = [...document.querySelectorAll('.tool-check.selected')].map(t => t.dataset.tool);
+      const body = {
+        name, description: document.getElementById('agentDesc').value.trim(),
+        systemPrompt: document.getElementById('agentPrompt').value.trim(),
+        model: document.getElementById('agentModel').value, tools
+      };
+      if (editMode && currentAgent) {
+        body.id = currentAgent.id;
+        await fetch('/api/agents/update', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      } else {
+        await fetch('/api/agents', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+      }
+      closeModal();
+      await loadAgents();
+      if (editMode && currentAgent) {
+        currentAgent = agents.find(a => a.id === currentAgent.id);
+        if (currentAgent) document.getElementById('detailName').textContent = currentAgent.name;
+      }
+    }
+
+    async function openAgent(id) {
+      currentAgent = agents.find(a => a.id === id);
+      if (!currentAgent) return;
+      document.getElementById('listView').style.display = 'none';
+      document.getElementById('detailView').style.display = 'block';
+      document.getElementById('detailName').textContent = currentAgent.name;
+      document.getElementById('agentModelInfo').textContent = (currentAgent.model || 'llama-3.3-70b');
+      // Load chat history
+      try {
+        const r = await fetch('/api/agents/history', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentId: id }) });
+        const d = await r.json();
+        renderChat(d.history || []);
+      } catch { renderChat([]); }
+    }
+
+    function backToList() {
+      currentAgent = null;
+      document.getElementById('listView').style.display = 'block';
+      document.getElementById('detailView').style.display = 'none';
+      loadAgents();
+    }
+
+    function renderChat(history) {
+      const el = document.getElementById('chatArea');
+      if (!history.length) {
+        el.innerHTML = '<div style="color:#665;text-align:center;padding:40px">Start a conversation with your agent.</div>';
+        return;
+      }
+      el.innerHTML = history.map(m => `
+        <div class="chat-msg">
+          <div class="role ${m.role}">${m.role === 'user' ? 'YOU' : currentAgent?.name?.toUpperCase() || 'AGENT'}</div>
+          <div class="text">${esc(m.content)}</div>
+        </div>
+      `).join('');
+      el.scrollTop = el.scrollHeight;
+    }
+
+    let _agentVeniceKey = null;
+    async function getAgentVeniceKey() {
+      if (_agentVeniceKey) return _agentVeniceKey;
+      try { const r = await fetch('/api/get-key'); const d = await r.json(); if (d.key) { _agentVeniceKey = d.key; return _agentVeniceKey; } } catch {}
+      return null;
+    }
+
+    async function sendMsg() {
+      if (!currentAgent) return;
+      const input = document.getElementById('chatMsg');
+      const msg = input.value.trim();
+      if (!msg) return;
+      input.value = '';
+      const el = document.getElementById('chatArea');
+      if (el.querySelector('[style*="text-align:center"]')) el.innerHTML = '';
+      el.innerHTML += `<div class="chat-msg"><div class="role user">YOU</div><div class="text">${esc(msg)}</div></div>`;
+      el.innerHTML += `<div class="chat-msg" id="thinking"><div class="role assistant">${esc(currentAgent.name.toUpperCase())}</div><div class="text" style="color:#665">Thinking...</div></div>`;
+      el.scrollTop = el.scrollHeight;
+      try {
+        let d;
+        const key = await getAgentVeniceKey();
+        if (key) {
+          const model = currentAgent.model || 'llama-3.3-70b';
+          const sysPrompt = currentAgent.system_prompt || 'You are a helpful AI assistant.';
+          const res = await fetch('https://api.venice.ai/api/v1/chat/completions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${key}` },
+            body: JSON.stringify({ model, messages: [{ role: 'system', content: sysPrompt }, { role: 'user', content: msg }], max_tokens: 1024 }),
+          });
+          const data = await res.json();
+          d = data.error ? { error: data.error.message || JSON.stringify(data.error) } : { reply: data.choices?.[0]?.message?.content || 'No response.' };
+        } else {
+          const r = await fetch('/api/agents/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ agentId: currentAgent.id, message: msg }) });
+          d = await r.json();
+        }
+        const t = document.getElementById('thinking');
+        if (t) t.remove();
+        if (d.reply) {
+          el.innerHTML += `<div class="chat-msg"><div class="role assistant">${esc(currentAgent.name.toUpperCase())}</div><div class="text">${esc(d.reply)}</div></div>`;
+        } else if (d.error) {
+          el.innerHTML += `<div class="chat-msg"><div class="role assistant" style="color:#e44">ERROR</div><div class="text" style="color:#e44">${esc(d.error)}</div></div>`;
+        }
+      } catch (e) {
+        const t = document.getElementById('thinking'); if (t) t.remove();
+        el.innerHTML += `<div class="chat-msg"><div class="role assistant" style="color:#e44">ERROR</div><div class="text" style="color:#e44">${e.message}</div></div>`;
+      }
+      el.scrollTop = el.scrollHeight;
+    }
+
+    async function deleteAgent() {
+      if (!currentAgent || !confirm(`Delete agent "${currentAgent.name}"?`)) return;
+      await fetch('/api/agents/delete', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ id: currentAgent.id }) });
+      backToList();
+    }
+
+    function esc(s) { const d = document.createElement('div'); d.textContent = s || ''; return d.innerHTML; }
+    function timeAgo(ts) {
+      if (!ts) return 'just now';
+      const d = typeof ts === 'number' ? ts : new Date(ts.replace(' ', 'T') + 'Z').getTime();
+      if (isNaN(d)) return 'just now';
+      const s = Math.floor((Date.now() - d) / 1000);
+      if (s < 0) return 'just now';
+      if (s < 60) return 'just now'; if (s < 3600) return Math.floor(s/60) + 'm ago';
+      if (s < 86400) return Math.floor(s/3600) + 'h ago'; return Math.floor(s/86400) + 'd ago';
+    }
+
+    loadAgents();
+  </script>
+</body>
+</html>

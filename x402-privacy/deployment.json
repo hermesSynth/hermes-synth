@@ -1,0 +1,9 @@
+{
+  "network": "base",
+  "chainId": 8453,
+  "verifier": "0x3c0Be2df212d11b4a8FEd11469976880341ED335",
+  "pool": "0xD83f4184D3C815794a40c4540163C67872Be80D5",
+  "token": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "deployer": "0x15F9165d440b88a4CC6F0634eE9D8290096f6c5d",
+  "timestamp": "2026-05-31T17:41:48.549Z"
+}

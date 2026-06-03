@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roadmap — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="description" content="Hermes Synth Roadmap — From open-source platform to full-stack AI agent economy.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #0033ff;
+      --accent-dim: rgba(0,51,255,0.08);
+      --accent-border: rgba(0,51,255,0.2);
+      --bg: #ffffff;
+      --bg-card: #ffffff;
+      --border: rgba(0,51,255,0.08);
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --green: #16a34a;
+      --yellow: #ca8a04;
+      --blue: #0033ff;
+      --red: #dc2626;
+    }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 700; font-size: 16px;
+    }
+    .header-brand img { width: 28px; height: 28px; border-radius: 6px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .nav-link {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 13px; font-weight: 500;
+      transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text); background: rgba(0,51,255,0.05); }
+    .nav-link.active { color: var(--accent); background: var(--accent-dim); }
+    .btn-login {
+      padding: 8px 20px; border-radius: 8px;
+      border: 1px solid var(--border);
+      background: transparent; color: var(--text);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-login:hover { border-color: var(--accent); color: var(--accent); }
+
+    .container { max-width: 860px; margin: 0 auto; padding: 48px 24px 80px; }
+    .page-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent-dim); border: 1px solid var(--accent-border);
+      color: var(--accent); font-size: 11px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      padding: 6px 16px; border-radius: 20px; margin-bottom: 24px;
+    }
+    h1 {
+      font-size: clamp(32px, 5vw, 48px);
+      font-weight: 800; line-height: 1.1; margin-bottom: 12px;
+    }
+    h1 span { color: var(--accent); }
+    .subtitle { color: var(--text-secondary); font-size: 15px; margin-bottom: 48px; line-height: 1.6; }
+
+    .timeline { position: relative; padding-left: 32px; }
+    .timeline::before {
+      content: ''; position: absolute; left: 10px; top: 0; bottom: 0;
+      width: 2px; background: var(--border);
+    }
+    .phase {
+      position: relative; margin-bottom: 40px;
+    }
+    .phase::before {
+      content: ''; position: absolute; left: -26px; top: 6px;
+      width: 14px; height: 14px; border-radius: 50%;
+      border: 2px solid var(--border);
+      background: var(--bg);
+    }
+    .phase.completed::before { background: var(--green); border-color: var(--green); }
+    .phase.active::before { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 12px rgba(0,51,255,0.4); }
+    .phase.upcoming::before { background: var(--bg-card); border-color: var(--text-secondary); }
+
+    .phase-header {
+      display: flex; align-items: center; gap: 12px; margin-bottom: 12px; flex-wrap: wrap;
+    }
+    .phase-title { font-size: 18px; font-weight: 700; }
+    .phase-status {
+      font-size: 11px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase;
+      padding: 3px 10px; border-radius: 12px;
+    }
+    .phase-status.done { background: rgba(63,185,80,0.15); color: var(--green); }
+    .phase-status.progress { background: var(--accent-dim); color: var(--accent); }
+    .phase-status.soon { background: rgba(139,148,158,0.15); color: var(--text-secondary); }
+    .phase-time { font-size: 12px; color: var(--text-secondary); }
+
+    .phase-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 20px;
+    }
+    .phase-card ul { list-style: none; }
+    .phase-card li {
+      font-size: 13px; line-height: 2;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .check { color: var(--green); font-size: 14px; }
+    .pending { color: var(--text-secondary); font-size: 14px; }
+    .li-text { color: var(--text-secondary); }
+    .li-text.done { color: var(--text); text-decoration: line-through; text-decoration-color: var(--green); }
+
+    .ca-footer {
+      background: var(--bg-card);
+      border: 2px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 48px;
+    }
+    .ca-footer .label { color: var(--text-secondary); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .ca-footer .addr {
+      font-size: clamp(11px, 2.5vw, 15px); font-weight: 700; color: var(--accent);
+      word-break: break-all; cursor: pointer;
+    }
+    .ca-footer .warn { color: var(--red); font-size: 11px; font-weight: 600; margin-top: 10px; }
+    .ca-footer .copied { color: var(--green); font-size: 12px; margin-top: 6px; display: none; }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      color: var(--text-secondary); font-size: 12px;
+    }
+    footer a { color: var(--text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 600px) {
+      header { padding: 12px 16px; }
+      .container { padding: 32px 16px 60px; }
+      .nav-link { display: none; }
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="header-brand">
+      <img src="/logo.png?v=4" alt="Hermes Synth">
+      <span>hermes synth</span>
+    </a>
+    <div class="header-right">
+      <a href="/docs" class="nav-link">Docs</a>
+      <a href="/roadmap" class="nav-link active">Roadmap</a>
+      <a href="/login" class="btn-login">Login</a>
+    </div>
+  </header>
+
+  <div class="container">
+    <div class="page-badge">ROADMAP</div>
+    <h1>From platform to <span>ecosystem</span>.</h1>
+    <p class="subtitle">The journey from open-source AI agent platform to a fully decentralized AI agent economy.</p>
+
+    <div class="timeline">
+      <!-- Phase 1 -->
+      <div class="phase completed">
+        <div class="phase-header">
+          <span class="phase-title">Phase 1 — Foundation</span>
+          <span class="phase-status done">Completed</span>
+        </div>
+        <div class="phase-card">
+          <ul>
+            <li><span class="check">✓</span> <span class="li-text done">Launch Hermes Synth platform (hermessynth.org)</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Multi-model AI chat (Llama 3.3 70B, 405B, DeepSeek R1, Qwen 2.5)</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Agent builder — create, edit, delete, chat with custom agents</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Code editor with real-time execution</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">AI-powered terminal & command center</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Tasks, cron jobs, skills automation</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Auth system (Google, GitHub, email + verification)</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Admin dashboard & usage analytics</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Open-source GitHub release</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 2 -->
+      <div class="phase completed">
+        <div class="phase-header">
+          <span class="phase-title">Phase 2 — Base MCP Integration</span>
+          <span class="phase-status done">Completed</span>
+        </div>
+        <div class="phase-card">
+          <ul>
+            <li><span class="check">✓</span> <span class="li-text done">Base MCP terminal — connect AI agents to blockchain</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Wallet connect via Privy (MetaMask, Coinbase, WalletConnect)</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Send ETH/tokens on Base</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Swap via Uniswap V3 router</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">Sign messages & contract calls</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">DeFi plugin integrations (Uniswap, Aerodrome, Morpho, Moonwell)</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">MCP Agent chat with blockchain commands</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 3 — Community Token -->
+      <div class="phase active">
+        <div class="phase-header">
+          <span class="phase-title">Phase 3 — Community Token</span>
+          <span class="phase-status progress">Live</span>
+        </div>
+        <div class="phase-card">
+          <ul>
+            <li><span class="check">✓</span> <span class="li-text done">Community token launched on Base Network</span></li>
+            <li><span class="check">✓</span> <span class="li-text done">100% community-driven — no team allocation</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Token-gated premium features (advanced models, priority API)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Holder rewards — stake for exclusive agent templates</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Governance — vote on platform features & roadmap priorities</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Agent deployment fees paid in token</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Revenue share for token stakers</span></li>
+            <li><span class="pending">○</span> <span class="li-text">MCP swap integration — trade community token via AI agents</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 4 -->
+      <div class="phase active">
+        <div class="phase-header">
+          <span class="phase-title">Phase 4 — Platform Expansion</span>
+          <span class="phase-status progress">In Progress</span>
+        </div>
+        <div class="phase-card">
+          <ul>
+            <li><span class="pending">○</span> <span class="li-text">Agent marketplace — share & download agent configs</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Team collaboration & workspaces</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Webhook integrations (Discord, Telegram, Slack)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Mobile PWA (installable app)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">More AI models (OpenAI, Anthropic, Google)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Swap aggregator (best routes across DEXs)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Portfolio tracker</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Phase 5 -->
+      <div class="phase upcoming">
+        <div class="phase-header">
+          <span class="phase-title">Phase 5 — Ecosystem Growth</span>
+          <span class="phase-status soon">Q4 2026</span>
+        </div>
+        <div class="phase-card">
+          <ul>
+            <li><span class="pending">○</span> <span class="li-text">Multi-chain expansion (Arbitrum, Polygon, Ethereum mainnet)</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Agent-to-agent communication protocol</span></li>
+            <li><span class="pending">○</span> <span class="li-text">SDK for third-party developers</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Enterprise tier with SLA and dedicated compute</span></li>
+            <li><span class="pending">○</span> <span class="li-text">Strategic partnerships with AI providers</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Token Utility -->
+    <div class="ca-footer" style="margin-top: 48px; margin-bottom: 24px;">
+      <div class="label">Token Utility</div>
+      <ul style="list-style: none; text-align: left; font-size: 13px; line-height: 2.2; margin: 16px 0;">
+        <li>⚡ <strong>Premium Access</strong> — Hold tokens to unlock GPT-4o, Claude, advanced models</li>
+        <li>🎯 <strong>Agent Fees</strong> — Deploy agents using community token</li>
+        <li>🗳️ <strong>Governance</strong> — Vote on features, integrations, partnerships</li>
+        <li>💰 <strong>Staking Rewards</strong> — Earn revenue share from platform fees</li>
+        <li>🔑 <strong>Exclusive Templates</strong> — Token-gated agent templates & plugins</li>
+        <li>🔄 <strong>MCP Integration</strong> — Swap & trade directly via AI agents</li>
+      </ul>
+    </div>
+
+    <!-- Contract Address -->
+    <div class="ca-footer">
+      <div class="label">Community Token — Contract Address (Base)</div>
+      <div class="addr" onclick="navigator.clipboard.writeText('0xaEAb9bbC7bf514FcC4c64dAF17F2375C9ED3EBA3');document.getElementById('copied').style.display='block';setTimeout(()=>document.getElementById('copied').style.display='none',2000);">0xaEAb9bbC7bf514FcC4c64dAF17F2375C9ED3EBA3</div>
+      <div class="copied" id="copied">✓ Copied to clipboard</div>
+      <div class="warn">⚠️ Always verify the contract address. Community-driven token on Base Network.</div>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>&copy; 2026 Hermes Synth</span>
+    <div style="display:flex;gap:24px;">
+      <a href="/docs">Docs</a>
+      <a href="/roadmap">Roadmap</a>
+      <a href="https://github.com/hermesSynth/hermes-synth">GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+name = "hermes-synth"
+compatibility_date = "2024-09-23"
+pages_build_output_dir = "./public"
+
+[[d1_databases]]
+binding = "DB"
+database_name = "hermes-synth-db"
+database_id = "9144afed-5d96-4970-8b96-8b37737fe0b0"

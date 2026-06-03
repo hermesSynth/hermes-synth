@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Docs — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <meta name="description" content="Hermes Synth Documentation — Everything you need to build, deploy, and manage AI agents.">
+  <meta name="theme-color" content="#ffffff">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --accent: #0033ff;
+      --accent-dim: rgba(0,51,255,0.08);
+      --accent-border: rgba(0,51,255,0.2);
+      --bg: #ffffff;
+      --bg-card: #ffffff;
+      --border: rgba(0,51,255,0.08);
+      --text: #0f172a;
+      --text-secondary: #475569;
+      --green: #16a34a;
+      --blue: #0033ff;
+    }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+    }
+    header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 16px 32px;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(255,255,255,0.9);
+      backdrop-filter: blur(12px);
+    }
+    .header-brand {
+      display: flex; align-items: center; gap: 10px;
+      text-decoration: none; color: var(--text);
+      font-weight: 700; font-size: 16px;
+    }
+    .header-brand img { width: 28px; height: 28px; border-radius: 6px; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+    .nav-link {
+      padding: 6px 14px; border-radius: 6px;
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 13px; font-weight: 500; transition: all 0.2s;
+    }
+    .nav-link:hover { color: var(--text); background: rgba(0,51,255,0.05); }
+    .nav-link.active { color: var(--accent); background: var(--accent-dim); }
+    .btn-login {
+      padding: 8px 20px; border-radius: 8px;
+      border: 1px solid var(--border); background: transparent; color: var(--text);
+      font-family: inherit; font-size: 13px; font-weight: 600;
+      cursor: pointer; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-login:hover { border-color: var(--accent); color: var(--accent); }
+
+    .layout { display: flex; min-height: calc(100vh - 65px); }
+    .sidebar {
+      width: 240px; border-right: 1px solid var(--border);
+      padding: 24px 16px; flex-shrink: 0;
+      position: sticky; top: 65px; height: calc(100vh - 65px); overflow-y: auto;
+    }
+    .sidebar-title {
+      font-size: 11px; color: var(--text-secondary); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px; padding: 0 8px;
+    }
+    .sidebar-link {
+      display: block; padding: 8px 12px; border-radius: 6px;
+      text-decoration: none; color: var(--text-secondary);
+      font-size: 13px; transition: all 0.2s; margin-bottom: 2px;
+    }
+    .sidebar-link:hover { color: var(--text); background: rgba(0,51,255,0.05); }
+    .sidebar-link.active { color: var(--accent); background: var(--accent-dim); }
+    .sidebar-divider { height: 1px; background: var(--border); margin: 16px 8px; }
+
+    .content { flex: 1; padding: 40px 48px 80px; max-width: 720px; }
+    .content h1 {
+      font-size: 32px; font-weight: 800; margin-bottom: 8px;
+    }
+    .content h1 span { color: var(--accent); }
+    .content .desc { color: var(--text-secondary); font-size: 14px; margin-bottom: 40px; line-height: 1.6; }
+    .content h2 {
+      font-size: 20px; font-weight: 700; margin: 36px 0 16px;
+      padding-bottom: 8px; border-bottom: 1px solid var(--border);
+    }
+    .content h3 { font-size: 16px; font-weight: 700; margin: 24px 0 10px; color: var(--accent); }
+    .content p { color: var(--text-secondary); font-size: 13px; line-height: 1.8; margin-bottom: 16px; }
+    .content ul { list-style: none; margin-bottom: 16px; }
+    .content li {
+      color: var(--text-secondary); font-size: 13px; line-height: 2;
+      padding-left: 16px; position: relative;
+    }
+    .content li::before {
+      content: ''; position: absolute; left: 0; top: 11px;
+      width: 4px; height: 4px; background: var(--accent); border-radius: 50%;
+    }
+    .code-block {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 8px; padding: 16px 20px;
+      font-size: 13px; color: var(--green);
+      overflow-x: auto; margin-bottom: 16px; line-height: 1.6;
+    }
+    .code-inline {
+      background: rgba(0,51,255,0.1); color: var(--accent);
+      padding: 2px 6px; border-radius: 4px; font-size: 12px;
+    }
+    .info-box {
+      background: rgba(88,166,255,0.08); border: 1px solid rgba(88,166,255,0.2);
+      border-radius: 8px; padding: 16px; margin-bottom: 16px;
+      font-size: 13px; color: var(--blue);
+    }
+    .warn-box {
+      background: rgba(248,81,73,0.08); border: 1px solid rgba(248,81,73,0.2);
+      border-radius: 8px; padding: 16px; margin-bottom: 16px;
+      font-size: 13px; color: #f85149;
+    }
+    table {
+      width: 100%; border-collapse: collapse; margin-bottom: 16px;
+      font-size: 13px;
+    }
+    th {
+      text-align: left; padding: 10px 12px;
+      background: var(--bg-card); border: 1px solid var(--border);
+      color: var(--text); font-weight: 600;
+    }
+    td {
+      padding: 10px 12px; border: 1px solid var(--border);
+      color: var(--text-secondary);
+    }
+
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 20px 32px;
+      display: flex; justify-content: space-between; align-items: center;
+      color: var(--text-secondary); font-size: 12px;
+    }
+    footer a { color: var(--text-secondary); text-decoration: none; }
+    footer a:hover { color: var(--accent); }
+
+    @media (max-width: 768px) {
+      .sidebar { display: none; }
+      .content { padding: 24px 16px 60px; }
+      .nav-link { display: none; }
+      header { padding: 12px 16px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <header>
+    <a href="/" class="header-brand">
+      <img src="/logo.png?v=4" alt="Hermes Synth">
+      <span>hermes synth</span>
+    </a>
+    <div class="header-right">
+      <a href="/docs" class="nav-link active">Docs</a>
+      <a href="/roadmap" class="nav-link">Roadmap</a>
+      <a href="/login" class="btn-login">Login</a>
+    </div>
+  </header>
+
+  <div class="layout">
+    <nav class="sidebar">
+      <div class="sidebar-title">Getting Started</div>
+      <a href="#overview" class="sidebar-link active">Overview</a>
+      <a href="#quickstart" class="sidebar-link">Quick Start</a>
+      <a href="#self-host" class="sidebar-link">Self-hosting</a>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-title">Features</div>
+      <a href="#chat" class="sidebar-link">AI Chat</a>
+      <a href="#agents" class="sidebar-link">Agents</a>
+      <a href="#editor" class="sidebar-link">Code Editor</a>
+      <a href="#terminal" class="sidebar-link">Terminal</a>
+      <a href="#command" class="sidebar-link">Command Center</a>
+      <a href="#tasks" class="sidebar-link">Tasks & Cron</a>
+      <a href="#browser" class="sidebar-link">Browser</a>
+      <a href="#settings" class="sidebar-link">Settings</a>
+      <a href="#mcp" class="sidebar-link" style="color:#0033ff;">Base MCP</a>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-title">Token</div>
+      <a href="/roadmap" class="sidebar-link">Roadmap</a>
+      <div class="sidebar-divider"></div>
+      <div class="sidebar-title">Resources</div>
+      <a href="#api" class="sidebar-link">API Reference</a>
+      <a href="#env" class="sidebar-link">Environment Variables</a>
+      <a href="#architecture" class="sidebar-link">Architecture</a>
+      <a href="https://github.com/hermesSynth/hermes-synth" class="sidebar-link" target="_blank">GitHub</a>
+    </nav>
+
+    <main class="content">
+      <h1 id="overview">Hermes <span>Codex</span> Docs</h1>
+      <p class="desc">Everything you need to build, deploy, and manage AI agents with Hermes Synth — the open-source AI agent platform.</p>
+
+      <div class="info-box">
+        Live platform: <a href="https://hermessynth.org" style="color:var(--blue)">hermessynth.org</a> — free to use, no setup needed.
+      </div>
+
+      <h2 id="quickstart">Quick Start</h2>
+      <p>The fastest way to start is the hosted version:</p>
+      <ul>
+        <li>Go to <span class="code-inline">hermessynth.org</span></li>
+        <li>Register with email, Google, or GitHub</li>
+        <li>Start chatting with AI, create agents, write code</li>
+      </ul>
+
+      <h2 id="self-host">Self-hosting on Cloudflare</h2>
+      <p>Hermes Synth runs entirely on Cloudflare Pages (free tier). Here's how to deploy your own instance:</p>
+      <div class="code-block">
+# 1. Clone the repository<br>
+git clone https://github.com/hermesSynth/hermes-synth.git<br>
+cd hermes-synth<br><br>
+# 2. Install dependencies<br>
+npm install<br><br>
+# 3. Create D1 database<br>
+npx wrangler d1 create hermes-synth-db<br><br>
+# 4. Run schema<br>
+npx wrangler d1 execute hermes-synth-db --remote --file=schema.sql<br><br>
+# 5. Deploy<br>
+npx wrangler pages deploy public --project-name=hermes-synth
+      </div>
+
+      <h2 id="env">Environment Variables</h2>
+      <p>Set these in Cloudflare Pages → Settings → Environment Variables:</p>
+      <table>
+        <tr><th>Variable</th><th>Required</th><th>Description</th></tr>
+        <tr><td><span class="code-inline">JWT_SECRET</span></td><td>Yes</td><td>Secret for signing auth tokens</td></tr>
+        <tr><td><span class="code-inline">VENICE_API_KEY</span></td><td>Yes</td><td>Venice AI API key</td></tr>
+        <tr><td><span class="code-inline">RESEND_API_KEY</span></td><td>No</td><td>For email verification</td></tr>
+        <tr><td><span class="code-inline">GOOGLE_CLIENT_ID</span></td><td>No</td><td>Google OAuth</td></tr>
+        <tr><td><span class="code-inline">GOOGLE_CLIENT_SECRET</span></td><td>No</td><td>Google OAuth</td></tr>
+        <tr><td><span class="code-inline">GITHUB_CLIENT_ID</span></td><td>No</td><td>GitHub OAuth</td></tr>
+        <tr><td><span class="code-inline">GITHUB_CLIENT_SECRET</span></td><td>No</td><td>GitHub OAuth</td></tr>
+      </table>
+
+      <h2 id="chat">AI Chat</h2>
+      <h3>Multi-model support</h3>
+      <p>Chat supports 4 AI models from Venice AI. Switch models mid-conversation:</p>
+      <ul>
+        <li><strong>Llama 3.3 70B</strong> — fast, general purpose</li>
+        <li><strong>Llama 3.1 405B</strong> — highest quality responses</li>
+        <li><strong>DeepSeek R1</strong> — reasoning and analysis</li>
+        <li><strong>Qwen 2.5 VL</strong> — multilingual and visual</li>
+      </ul>
+      <h3>Features</h3>
+      <ul>
+        <li>Context-aware — sends last 10 messages as conversation context</li>
+        <li>File upload — attach files (max 5MB) for AI to analyze</li>
+        <li>Configurable — temperature, max tokens, system prompt in Settings</li>
+        <li>Chat history saved to D1 database</li>
+      </ul>
+
+      <h2 id="agents">Agents</h2>
+      <p>Create custom AI agents with their own personality and purpose:</p>
+      <ul>
+        <li><strong>Name</strong> — give each agent a unique name</li>
+        <li><strong>System Prompt</strong> — define the agent's behavior and expertise</li>
+        <li><strong>Model</strong> — choose which AI model the agent uses</li>
+        <li><strong>Chat</strong> — each agent has its own chat history</li>
+        <li><strong>CRUD</strong> — create, edit, delete agents anytime</li>
+      </ul>
+
+      <h2 id="editor">Code Editor</h2>
+      <p>Write and run code directly in the browser:</p>
+      <ul>
+        <li><strong>JavaScript</strong> — executed in real V8 runtime (real output)</li>
+        <li><strong>Python, Ruby, Go, Rust, Java, C/C++, Bash</strong> — AI-interpreted execution</li>
+        <li><strong>HTML</strong> — AI describes rendered output</li>
+        <li>Project management — create and organize multiple projects</li>
+        <li>Console output with exit codes</li>
+      </ul>
+
+      <h2 id="terminal">Terminal</h2>
+      <p>AI-powered terminal that handles both built-in commands and AI interpretation:</p>
+      <h3>Built-in commands</h3>
+      <ul>
+        <li><span class="code-inline">whoami</span> — show user info from database</li>
+        <li><span class="code-inline">agents</span> — list all agents</li>
+        <li><span class="code-inline">tasks</span> — list all tasks</li>
+        <li><span class="code-inline">skills</span> — list all skills</li>
+        <li><span class="code-inline">ls</span>, <span class="code-inline">help</span>, <span class="code-inline">clear</span> — standard commands</li>
+      </ul>
+      <h3>AI commands</h3>
+      <p>Any unrecognized command gets sent to Venice AI, which interprets and responds as if running in a real terminal. Example:</p>
+      <div class="code-block">
+$ python3 -c "print('hello world')"<br>
+hello world
+      </div>
+
+      <h2 id="command">Command Center</h2>
+      <p>14+ system commands with live data from the database:</p>
+      <ul>
+        <li><span class="code-inline">status</span> — real stats (agents, tasks, skills, API keys)</li>
+        <li><span class="code-inline">agents</span> — list agents from DB</li>
+        <li><span class="code-inline">tasks</span>, <span class="code-inline">skills</span>, <span class="code-inline">cron</span> — list from DB</li>
+        <li><span class="code-inline">config</span>, <span class="code-inline">plugins</span>, <span class="code-inline">keys</span> — settings data</li>
+        <li><span class="code-inline">stats</span> — full account statistics</li>
+        <li><span class="code-inline">logs</span> — recent chat activity</li>
+        <li><span class="code-inline">wallet</span> — balance and transactions</li>
+      </ul>
+
+      <h2 id="tasks">Tasks & Cron Jobs</h2>
+      <h3>Autonomous Tasks</h3>
+      <p>Describe a goal → AI breaks it into steps → auto-executes. Tasks track status (pending, running, completed, failed) and save results to database.</p>
+      <h3>Cron Jobs</h3>
+      <p>Schedule recurring AI-powered tasks:</p>
+      <ul>
+        <li>Intervals: every 5 min, 15 min, 30 min, hourly, daily</li>
+        <li>Each cron job runs an AI task on schedule</li>
+        <li>Enable/disable without deleting</li>
+      </ul>
+
+      <h2 id="browser">Browser</h2>
+      <p>Web scraping and AI summarization:</p>
+      <ul>
+        <li>Enter any URL → extract text content and links</li>
+        <li>AI summarization of scraped content</li>
+        <li>Save scrape results to database</li>
+      </ul>
+
+      <h2 id="settings">Settings</h2>
+      <p>Full configuration panel with 9 sections:</p>
+      <ul>
+        <li><strong>Config</strong> — model, temperature, max tokens, system prompt</li>
+        <li><strong>API Keys</strong> — manage Venice AI and other keys</li>
+        <li><strong>Plugins</strong> — toggle extensions on/off</li>
+        <li><strong>Profiles</strong> — edit name, bio, photo</li>
+        <li><strong>Preferences</strong> — theme, language, notifications</li>
+        <li><strong>Data Export</strong> — download all data as JSON</li>
+        <li><strong>Notifications</strong> — view and manage alerts</li>
+      </ul>
+
+      <h2 id="mcp" style="color:#0033ff;">Base MCP Integration</h2>
+      <p>Hermes Synth integrates with <a href="https://docs.base.org/ai-agents" style="color:#0033ff;" target="_blank">Base MCP</a> (Model Context Protocol) to give your AI agents direct access to Base blockchain.</p>
+      <ul>
+        <li><strong>Send & Receive</strong> — Send ETH, USDC, or any ERC-20 to addresses, ENS names, basenames</li>
+        <li><strong>Swap Tokens</strong> — Swap via Uniswap, Aerodrome, and other DEXs on Base</li>
+        <li><strong>Sign Messages</strong> — Sign EIP-712 typed data and personal messages</li>
+        <li><strong>Contract Calls</strong> — Execute smart contract interactions with batch approvals</li>
+        <li><strong>DeFi Plugins</strong> — Morpho, Moonwell, Uniswap, Aerodrome, Virtuals, Bankr</li>
+      </ul>
+      <p>Every write action requires user approval via Base Account. Access at <a href="/mcp" style="color:#0033ff;">/mcp</a>.</p>
+      <h3>MCP API Endpoints</h3>
+      <table>
+        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+        <tr><td>/api/mcp/connect</td><td>POST</td><td>Connect Base Account via MCP</td></tr>
+        <tr><td>/api/mcp/balance</td><td>GET</td><td>Get wallet balances (ETH, USDC)</td></tr>
+        <tr><td>/api/mcp/send</td><td>POST</td><td>Send tokens to address</td></tr>
+        <tr><td>/api/mcp/swap</td><td>POST</td><td>Swap tokens via DEX</td></tr>
+        <tr><td>/api/mcp/sign</td><td>POST</td><td>Sign message or typed data</td></tr>
+        <tr><td>/api/mcp/contract</td><td>POST</td><td>Execute contract call</td></tr>
+        <tr><td>/api/mcp/chat</td><td>POST</td><td>Chat with MCP agent</td></tr>
+      </table>
+
+      <h2 id="api">API Reference</h2>
+      <p>All API endpoints are Cloudflare Pages Functions under <span class="code-inline">/functions/</span>:</p>
+      <table>
+        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
+        <tr><td>/auth/login</td><td>POST</td><td>Email/password login</td></tr>
+        <tr><td>/auth/register</td><td>POST</td><td>Create account</td></tr>
+        <tr><td>/auth/google</td><td>GET</td><td>Google OAuth redirect</td></tr>
+        <tr><td>/auth/github</td><td>GET</td><td>GitHub OAuth redirect</td></tr>
+        <tr><td>/api/chat</td><td>POST</td><td>Send message to AI</td></tr>
+        <tr><td>/api/agents</td><td>GET/POST</td><td>List/create agents</td></tr>
+        <tr><td>/api/agents/[id]</td><td>PUT/DELETE</td><td>Update/delete agent</td></tr>
+        <tr><td>/api/agents/chat</td><td>POST</td><td>Chat with agent</td></tr>
+        <tr><td>/api/tasks</td><td>GET/POST</td><td>List/create tasks</td></tr>
+        <tr><td>/api/skills</td><td>GET/POST</td><td>List/create skills</td></tr>
+        <tr><td>/api/terminal</td><td>POST</td><td>Execute terminal command</td></tr>
+        <tr><td>/api/command</td><td>POST</td><td>Execute command center</td></tr>
+        <tr><td>/api/upload</td><td>POST</td><td>Upload file</td></tr>
+        <tr><td>/api/export</td><td>GET</td><td>Export data as JSON</td></tr>
+        <tr><td>/api/notifications</td><td>GET/DELETE</td><td>Manage notifications</td></tr>
+        <tr><td>/api/mcp/*</td><td>POST/GET</td><td>Base MCP operations</td></tr>
+      </table>
+      <p>All API endpoints (except auth) require a JWT token in the <span class="code-inline">Authorization: Bearer &lt;token&gt;</span> header.</p>
+
+      <h2 id="architecture">Architecture</h2>
+      <div class="code-block">
+┌──────────────┐     ┌──────────────────┐     ┌─────────────┐<br>
+│   Browser    │────▶│  Cloudflare Pages │────▶│  Venice AI  │<br>
+│  (Frontend)  │◀────│   (Functions)     │◀────│  (4 models) │<br>
+└──────────────┘     └────────┬─────────┘     └─────────────┘<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;┌────────▼─────────┐<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  Cloudflare D1   │<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;│  (12+ tables)    │<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└──────────────────┘
+      </div>
+      <table>
+        <tr><th>Layer</th><th>Technology</th></tr>
+        <tr><td>Frontend</td><td>Vanilla HTML/CSS/JS, JetBrains Mono</td></tr>
+        <tr><td>Backend</td><td>Cloudflare Pages Functions (serverless)</td></tr>
+        <tr><td>Database</td><td>Cloudflare D1 (SQLite at the edge)</td></tr>
+        <tr><td>AI</td><td>Venice AI — 4 models</td></tr>
+        <tr><td>Auth</td><td>JWT + bcrypt, Google/GitHub OAuth</td></tr>
+        <tr><td>Email</td><td>Resend (noreply@hermessynth.org)</td></tr>
+      </table>
+
+
+    </main>
+  </div>
+
+  <footer>
+    <span>&copy; 2026 Hermes Synth</span>
+    <div style="display:flex;gap:24px;">
+      <a href="/docs">Docs</a>
+      <a href="/roadmap">Roadmap</a>
+      <a href="https://github.com/hermesSynth/hermes-synth">GitHub</a>
+    </div>
+  </footer>
+
+  <script>
+    document.querySelectorAll('.sidebar-link[href^="#"]').forEach(link => {
+      link.addEventListener('click', e => {
+        document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+        link.classList.add('active');
+      });
+    });
+  </script>
+</body>
+</html>

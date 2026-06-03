@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Analytics — Hermes Synth</title>
+  <link rel="icon" type="image/png" href="/logo.png?v=4">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&display=swap">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'JetBrains Mono', monospace;
+      background: #ffffff;
+      color: #0f172a;
+      min-height: 100vh;
+      padding: 20px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container { max-width: 800px; margin: 0 auto; }
+    .topbar {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 0; margin-bottom: 24px;
+    }
+    .badge {
+      background: #0033ff; color: #000; font-size: 11px; font-weight: 700;
+      padding: 6px 14px; border-radius: 20px; letter-spacing: 2px;
+    }
+    .nav-links { display: flex; gap: 12px; }
+    .nav-links a {
+      color: #475569; text-decoration: none; font-size: 12px;
+      padding: 6px 12px; border: 1px solid rgba(0,51,255,0.1);
+      border-radius: 8px; transition: all 0.2s;
+    }
+    .nav-links a:hover { border-color: #0033ff; color: #0033ff; }
+    h1 { font-size: 24px; margin-bottom: 8px; }
+    h1 span { color: #0033ff; }
+    .sub { color: #475569; font-size: 13px; margin-bottom: 32px; }
+
+    .stats-grid {
+      display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+      margin-bottom: 32px;
+    }
+    .stat-card {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.06);
+      border-radius: 12px; padding: 16px; text-align: center;
+    }
+    .stat-num { font-size: 28px; font-weight: 700; color: #0033ff; line-height: 1; }
+    .stat-label {
+      font-size: 10px; color: #475569; margin-top: 6px;
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+
+    .section-title {
+      font-size: 11px; color: #475569; letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 12px; font-weight: 600;
+    }
+    .chart-card {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.06);
+      border-radius: 12px; padding: 20px; margin-bottom: 24px;
+    }
+    .chart-title {
+      font-size: 13px; font-weight: 600; margin-bottom: 16px; color: #0f172a;
+    }
+
+    /* Bar chart */
+    .bar-chart { display: flex; align-items: flex-end; gap: 4px; height: 160px; }
+    .bar-col { flex: 1; display: flex; flex-direction: column; align-items: center; }
+    .bar {
+      width: 100%; min-width: 16px; border-radius: 4px 4px 0 0;
+      background: linear-gradient(to top, #0033ff, #3b7dff);
+      transition: height 0.5s ease;
+    }
+    .bar-label { font-size: 9px; color: #475569; margin-top: 6px; text-align: center; }
+    .bar-value { font-size: 9px; color: #0033ff; margin-bottom: 4px; font-weight: 600; }
+
+    /* Donut chart */
+    .donut-container { display: flex; align-items: center; gap: 24px; }
+    .donut-svg { width: 120px; height: 120px; }
+    .donut-legend { flex: 1; }
+    .legend-item {
+      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 8px; font-size: 12px;
+    }
+    .legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+    .legend-val { color: #475569; margin-left: auto; }
+
+    /* Table */
+    .table-card {
+      background: #ffffff; border: 1px solid rgba(0,51,255,0.06);
+      border-radius: 12px; padding: 16px; margin-bottom: 24px;
+    }
+    table { width: 100%; border-collapse: collapse; }
+    th {
+      text-align: left; font-size: 11px; color: #475569; padding: 8px 12px;
+      border-bottom: 1px solid rgba(0,51,255,0.06);
+      text-transform: uppercase; letter-spacing: 1px;
+    }
+    td { padding: 10px 12px; font-size: 13px; border-bottom: 1px solid rgba(0,51,255,0.03); }
+    .token-bar {
+      height: 6px; border-radius: 3px; background: rgba(0,51,255,0.2);
+      position: relative; overflow: hidden;
+    }
+    .token-bar-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(to right, #0033ff, #3b7dff);
+    }
+
+    .loading { text-align: center; padding: 60px; color: #475569; }
+    .error { text-align: center; padding: 60px; color: #ef4444; }
+
+    .bottom-nav {
+      position: fixed; bottom: 0; left: 0; right: 0;
+      background: #ffffff; border-top: 1px solid rgba(0,51,255,0.06);
+      display: flex; justify-content: space-around; padding: 8px 0 12px;
+      z-index: 100;
+    }
+    .bottom-nav a {
+      display: flex; flex-direction: column; align-items: center;
+      font-size: 10px; color: #475569; text-decoration: none;
+      padding: 4px 8px; gap: 2px; transition: color 0.2s;
+    }
+    .bottom-nav a:hover, .bottom-nav a.active { color: #0033ff; }
+    .bottom-nav img { width: 22px; height: 22px; }
+
+    .refresh-btn {
+      background: none; border: 1px solid rgba(0,51,255,0.1);
+      color: #475569; padding: 6px 14px; border-radius: 8px;
+      font-size: 11px; cursor: pointer; font-family: inherit;
+      transition: all 0.2s;
+    }
+    .refresh-btn:hover { border-color: #0033ff; color: #0033ff; }
+
+    @media (max-width: 600px) {
+      .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .donut-container { flex-direction: column; align-items: flex-start; }
+      .container { padding: 0 8px; }
+      .topbar { padding: 12px 10px; }
+      .charts-grid { grid-template-columns: 1fr; }
+      .chart-card { padding: 14px; }
+      h1 { font-size: 20px; }
+    }
+    @media (max-width: 380px) {
+      .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+      .stat-card { padding: 12px 10px; }
+      .stat-card .value { font-size: 18px; }
+    }
+  </style>
+  <link rel="stylesheet" href="/responsive.css">
+</head>
+<body>
+  <div class="page">
+  <div class="container" style="padding-bottom:80px">
+    <div class="topbar">
+      <div class="badge"><img src="/logo.png?v=4" alt="HS" style="width:20px;height:20px">ANALYTICS</div>
+      <a href="/settings" class="menu-btn" title="Settings" style="background:#fff;border:1px solid rgba(0,51,255,0.1);color:#0f172a;width:40px;height:40px;border-radius:8px;cursor:pointer;display:flex;align-items:center;justify-content:center;text-decoration:none;font-size:18px">&#9776;</a>
+    </div>
+
+    <h1>Usage <span>Analytics.</span></h1>
+    <p class="sub">Your activity, API usage, and performance metrics</p>
+
+    <!-- Personal Stats -->
+    <div class="section-title">YOUR ACTIVITY</div>
+    <div id="personalStats" class="loading">Loading your stats...</div>
+
+    <div style="margin:24px 0 16px;display:flex;gap:8px">
+      <button class="refresh-btn" onclick="loadPersonalStats()" style="flex:1">&#8635; Refresh</button>
+      <a href="/admin" class="refresh-btn" style="flex:1;text-align:center;text-decoration:none;display:block;line-height:1.5">Admin View</a>
+    </div>
+
+    <!-- Platform Stats (admin) -->
+    <div class="section-title" style="margin-top:32px">PLATFORM OVERVIEW</div>
+    <div id="content" class="loading">Loading platform analytics...</div>
+  </div>
+  </div>
+
+  <nav class="bottom-nav">
+    <a href="/chat"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Chat</a>
+    <a href="/agents"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="11" width="18" height="10" rx="2"/><circle cx="12" cy="5" r="4"/><circle cx="9" cy="16" r="1" fill="currentColor"/><circle cx="15" cy="16" r="1" fill="currentColor"/></svg>Agents</a>
+    <a href="/editor"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>Editor</a>
+    <a href="/terminal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>Terminal</a>
+    <a href="/mcp"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="6" width="20" height="12" rx="2"/><path d="M12 12h.01"/><path d="M17 12h.01"/><path d="M7 12h.01"/></svg>MCP</a>
+    <a href="/settings"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.72 12.72l1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>Settings</a>
+    <a href="/profile"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>Profile</a>
+  </nav>
+
+  <script>
+    const COLORS = ['#0033ff', '#16a34a', '#3b7dff', '#dc2626', '#bc8cff', '#79c0ff'];
+
+    function formatNum(n) {
+      if (n >= 1000000) return (n/1000000).toFixed(1) + 'M';
+      if (n >= 1000) return (n/1000).toFixed(1) + 'K';
+      return n.toString();
+    }
+
+    function buildBarChart(data, labelKey, valueKey) {
+      if (!data.length) return '<div style="color:#475569;text-align:center;padding:20px">No data yet</div>';
+      const max = Math.max(...data.map(d => d[valueKey]), 1);
+      let html = '<div class="bar-chart">';
+      for (const d of data) {
+        const h = Math.max((d[valueKey] / max) * 140, 4);
+        const label = d[labelKey].substring(5); // remove year
+        html += `<div class="bar-col">
+          <div class="bar-value">${formatNum(d[valueKey])}</div>
+          <div class="bar" style="height:${h}px"></div>
+          <div class="bar-label">${label}</div>
+        </div>`;
+      }
+      html += '</div>';
+      return html;
+    }
+
+    function buildDonut(data, labelKey, valueKey) {
+      if (!data.length) return '<div style="color:#475569;text-align:center;padding:20px">No data yet</div>';
+      const total = data.reduce((s, d) => s + d[valueKey], 0);
+      let offset = 0;
+      const radius = 40;
+      const circumference = 2 * Math.PI * radius;
+      let svgPaths = '';
+      let legend = '';
+      data.forEach((d, i) => {
+        const pct = d[valueKey] / (total || 1);
+        const dash = pct * circumference;
+        const color = COLORS[i % COLORS.length];
+        svgPaths += `<circle cx="60" cy="60" r="${radius}" fill="none" stroke="${color}" stroke-width="16"
+          stroke-dasharray="${dash} ${circumference - dash}" stroke-dashoffset="${-offset}"
+          transform="rotate(-90 60 60)"/>`;
+        offset += dash;
+        legend += `<div class="legend-item">
+          <div class="legend-dot" style="background:${color}"></div>
+          <span>${d[labelKey]}</span>
+          <span class="legend-val">${formatNum(d[valueKey])} (${(pct*100).toFixed(0)}%)</span>
+        </div>`;
+      });
+
+      return `<div class="donut-container">
+        <svg class="donut-svg" viewBox="0 0 120 120">${svgPaths}
+          <text x="60" y="58" text-anchor="middle" fill="#e0e0e0" font-size="16" font-weight="700" font-family="JetBrains Mono">${formatNum(total)}</text>
+          <text x="60" y="72" text-anchor="middle" fill="#888" font-size="8" font-family="JetBrains Mono">TOTAL</text>
+        </svg>
+        <div class="donut-legend">${legend}</div>
+      </div>`;
+    }
+
+    async function loadPersonalStats() {
+      const el = document.getElementById('personalStats');
+      try {
+        const [meRes, agentsRes, chatRes] = await Promise.all([
+          fetch('/auth/me'),
+          fetch('/api/agents'),
+          fetch('/api/chat', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ message: '', model: 'llama-3.3-70b', history: [], statsOnly: true }) }).catch(() => null)
+        ]);
+        if (meRes.status === 401) { window.location.href = '/login'; return; }
+        const me = await meRes.json();
+        const agents = (await agentsRes.json()).agents || [];
+        const user = me.user || me;
+        const joined = new Date(user.created_at || Date.now());
+        const daysActive = Math.max(1, Math.floor((Date.now() - joined.getTime()) / 86400000));
+
+        el.innerHTML = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-num">${agents.length}</div>
+              <div class="stat-label">Your Agents</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${daysActive}</div>
+              <div class="stat-label">Days Active</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${user.plan_tier === 'premium' ? 'PRO' : 'FREE'}</div>
+              <div class="stat-label">Plan</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${joined.toLocaleDateString('en', { month: 'short', day: 'numeric' })}</div>
+              <div class="stat-label">Joined</div>
+            </div>
+          </div>
+          ${agents.length > 0 ? `
+          <div class="chart-card">
+            <div class="chart-title">Your Agents</div>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              ${agents.map(a => `
+                <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(0,51,255,0.03);border-radius:8px">
+                  <div style="width:8px;height:8px;border-radius:50%;background:${a.status === 'active' ? '#16a34a' : '#475569'}"></div>
+                  <div style="flex:1;font-size:13px;font-weight:600">${a.name}</div>
+                  <div style="font-size:11px;color:#475569">${a.model || 'llama-3.3-70b'}</div>
+                </div>
+              `).join('')}
+            </div>
+          </div>` : '<div class="chart-card" style="text-align:center;color:#475569;padding:30px">No agents yet. <a href="/agents" style="color:#0033ff">Create one</a></div>'}
+        `;
+      } catch (e) {
+        el.innerHTML = '<div class="chart-card" style="text-align:center;color:#475569;padding:30px">Could not load personal stats</div>';
+      }
+    }
+    loadPersonalStats();
+
+    async function loadAnalytics() {
+      const el = document.getElementById('content');
+      try {
+        const res = await fetch('/api/admin/analytics');
+        if (res.status === 401) { window.location.href = '/login'; return; }
+        if (res.status === 403) { el.innerHTML = '<div class="error">Admin access required.</div>'; return; }
+        const d = await res.json();
+
+        let html = `
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-num">${formatNum(d.total_api_calls)}</div>
+              <div class="stat-label">API Calls</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${formatNum(d.total_tokens)}</div>
+              <div class="stat-label">Total Tokens</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${d.active_users_7d}</div>
+              <div class="stat-label">Active (7d)</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${d.total_chat_messages}</div>
+              <div class="stat-label">Messages</div>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-card">
+              <div class="stat-num">${formatNum(d.total_prompt_tokens)}</div>
+              <div class="stat-label">Prompt Tokens</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${formatNum(d.total_completion_tokens)}</div>
+              <div class="stat-label">Completion Tokens</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${d.total_agents}</div>
+              <div class="stat-label">Agents</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-num">${d.total_tasks}</div>
+              <div class="stat-label">Tasks</div>
+            </div>
+          </div>
+        `;
+
+        // Daily API calls chart
+        html += '<div class="section-title">API Calls — Last 14 Days</div>';
+        html += '<div class="chart-card">';
+        html += buildBarChart(d.daily, 'day', 'calls');
+        html += '</div>';
+
+        // Daily token usage chart
+        html += '<div class="section-title">Token Usage — Last 14 Days</div>';
+        html += '<div class="chart-card">';
+        const dailyTokens = d.daily.map(x => ({ day: x.day, tokens: x.prompt_tokens + x.completion_tokens }));
+        html += buildBarChart(dailyTokens, 'day', 'tokens');
+        html += '</div>';
+
+        // Model usage donut
+        html += '<div class="section-title">Usage by Model</div>';
+        html += '<div class="chart-card">';
+        html += buildDonut(d.by_model, 'model', 'calls');
+        html += '</div>';
+
+        // Endpoint usage donut
+        if (d.by_endpoint.length > 0) {
+          html += '<div class="section-title">Usage by Endpoint</div>';
+          html += '<div class="chart-card">';
+          html += buildDonut(d.by_endpoint, 'endpoint', 'calls');
+          html += '</div>';
+        }
+
+        // Model breakdown table
+        if (d.by_model.length > 0) {
+          const maxTokens = Math.max(...d.by_model.map(m => m.prompt_tokens + m.completion_tokens), 1);
+          html += '<div class="section-title">Model Breakdown</div>';
+          html += '<div class="table-card"><table><tr><th>Model</th><th>Calls</th><th>Tokens</th><th></th></tr>';
+          for (const m of d.by_model) {
+            const total = m.prompt_tokens + m.completion_tokens;
+            const pct = (total / maxTokens) * 100;
+            html += `<tr>
+              <td style="font-size:12px">${m.model}</td>
+              <td>${m.calls}</td>
+              <td>${formatNum(total)}</td>
+              <td style="width:120px"><div class="token-bar"><div class="token-bar-fill" style="width:${pct}%"></div></div></td>
+            </tr>`;
+          }
+          html += '</table></div>';
+        }
+
+        html += '<div style="text-align:center;margin-top:16px"><button class="refresh-btn" onclick="loadAnalytics()">↻ Refresh</button></div>';
+
+        el.innerHTML = html;
+      } catch (e) {
+        el.innerHTML = '<div class="error">Failed to load analytics.</div>';
+      }
+    }
+    loadAnalytics();
+  </script>
+</body>
+</html>
