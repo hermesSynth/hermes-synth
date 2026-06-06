@@ -147,34 +147,15 @@ hermes-synth/
 
 ---
 
-## Community Token
-
-> Built by the community, for the community.
-
-| | |
-|---|---|
-| **Network** | Base (Chain 8453) |
-| **CA** | `0xaEAb9bbC7bf514FcC4c64dAF17F2375C9ED3EBA3` |
-| **Type** | Community-driven, no team allocation |
-
-**Utility:**
-- ⚡ Token-gated premium features (GPT-4o, Claude, advanced models)
-- 🗳️ Governance — vote on platform features
-- 💰 Staking rewards & revenue share
-- 🔑 Exclusive agent templates & plugins
-- 🔄 MCP integration — swap & trade via AI agents
-
----
-
 ## Roadmap
 
 - [x] Platform launch (hermessynth.org)
 - [x] Base MCP integration (wallet, swap, send, sign)
 - [x] Multi-model support (Venice, OpenAI, Anthropic, Groq)
-- [x] Community token launch on Base
 - [x] Real code execution terminal (30+ languages via Wandbox)
 - [x] Bankr-style MCP redesign (dark chat interface)
-- [ ] Token-gated features & staking
+- [x] x402 Privacy — shielded USDC transactions on Base
+- [x] Chat sessions with markdown, streaming, search, pin, export
 - [ ] Agent marketplace
 - [ ] Team collaboration & workspaces
 - [ ] Webhook integrations (Discord, Telegram, Slack)
