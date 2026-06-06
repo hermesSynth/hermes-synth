@@ -156,6 +156,7 @@ hermes-synth/
 - [x] Bankr-style MCP redesign (dark chat interface)
 - [x] x402 Privacy — shielded USDC transactions on Base
 - [x] Chat sessions with markdown, streaming, search, pin, export
+- [ ] Token launch on Base — coming soon
 - [ ] Agent marketplace
 - [ ] Team collaboration & workspaces
 - [ ] Webhook integrations (Discord, Telegram, Slack)
