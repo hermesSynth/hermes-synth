@@ -17,6 +17,10 @@ Multi-model chat · Code editor · Terminal · Tasks · Cron · Base MCP
 
 [**Try it now →**](https://hermessynth.org) · [Docs](https://hermessynth.org/docs) · [Roadmap](https://hermessynth.org/roadmap) · [Base MCP](https://hermessynth.org/mcp) · [X](https://x.com/HermesSynth)
 
+<a href="https://orynth.dev/projects/hermes-synth" target="_blank" rel="noopener">
+  <img src="https://orynth.dev/api/badge/hermes-synth?theme=light&style=default" alt="Featured on Orynth" width="260" height="80" />
+</a>
+
 </div>
 
 ---
