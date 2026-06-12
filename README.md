@@ -7,7 +7,7 @@
 ### Open-source AI agent platform.
 
 Build, deploy, and manage autonomous AI agents from your browser.  
-Multi-model chat · Code editor · Terminal · Tasks · Cron · Base MCP
+Multi-model chat · Code editor · Terminal · Tasks · Cron · x402 Privacy
 
 [![Live Demo](https://img.shields.io/badge/LIVE-hermessynth.org-0033ff?style=for-the-badge)](https://hermessynth.org)
 [![Stars](https://img.shields.io/github/stars/hermesSynth/hermes-synth?style=for-the-badge&color=0033ff)](https://github.com/hermesSynth/hermes-synth/stargazers)
@@ -15,7 +15,7 @@ Multi-model chat · Code editor · Terminal · Tasks · Cron · Base MCP
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
 [![Base Network](https://img.shields.io/badge/Base-Network-0033ff?style=for-the-badge)](https://base.org)
 
-[**Try it now →**](https://hermessynth.org) · [Docs](https://hermessynth.org/docs) · [Roadmap](https://hermessynth.org/roadmap) · [Base MCP](https://hermessynth.org/mcp) · [X](https://x.com/HermesSynth)
+[**Try it now →**](https://hermessynth.org) · [Docs](https://hermessynth.org/docs) · [Roadmap](https://hermessynth.org/roadmap) · [X](https://x.com/HermesSynth)
 
 <a href="https://orynth.dev/projects/hermes-synth" target="_blank" rel="noopener">
   <img src="https://orynth.dev/api/badge/hermes-synth?theme=light&style=default" alt="Featured on Orynth" width="260" height="80" />
@@ -37,7 +37,6 @@ Multi-model chat · Code editor · Terminal · Tasks · Cron · Base MCP
 | **Autonomous Tasks** | Describe a goal → AI breaks it into steps → auto-executes |
 | **Cron Jobs** | Schedule recurring AI tasks (5 min to daily) |
 | **Browser** | Scrape URLs, extract text & links, AI summarization |
-| **Base MCP** | Bankr-style chat terminal — swap, send, sign on Base via inline commands |
 | **Wallet Connect** | OKX, MetaMask, Coinbase, WalletConnect, Rainbow |
 | **Analytics** | Usage dashboard — API calls, token usage, model breakdown |
 | **Auth** | Google OAuth · GitHub OAuth · Email/Password + verification |
@@ -81,7 +80,7 @@ npx wrangler pages dev public
 
 | Layer | Technology |
 |-------|-----------|
-| **Frontend** | Vanilla HTML/CSS/JS · JetBrains Mono · Clean white + dark (MCP) theme |
+| **Frontend** | Vanilla HTML/CSS/JS · JetBrains Mono · Clean dark theme |
 | **Backend** | Cloudflare Pages Functions (serverless) |
 | **Database** | Cloudflare D1 (SQLite at the edge) |
 | **AI** | Venice AI · OpenAI · Anthropic · Groq — 12+ models |
@@ -154,13 +153,11 @@ hermes-synth/
 ## Roadmap
 
 - [x] Platform launch (hermessynth.org)
-- [x] Base MCP integration (wallet, swap, send, sign)
 - [x] Multi-model support (Venice, OpenAI, Anthropic, Groq)
 - [x] Real code execution terminal (30+ languages via Wandbox)
-- [x] Bankr-style MCP redesign (dark chat interface)
 - [x] x402 Privacy — shielded USDC transactions on Base
 - [x] Chat sessions with markdown, streaming, search, pin, export
-- [ ] Token launch on Base — coming soon
+- [ ] Token launch on Solana — coming soon
 - [ ] Agent marketplace
 - [ ] Team collaboration & workspaces
 - [ ] Webhook integrations (Discord, Telegram, Slack)

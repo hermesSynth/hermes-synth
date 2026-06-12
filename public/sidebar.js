@@ -4,7 +4,6 @@
 
   const NAV = [
     { href:'/chat', icon:'chat', label:'Chat' },
-    { href:'/mcp', icon:'mcp', label:'MCP', badge:'New' },
     { href:'/terminal', icon:'terminal', label:'Terminal' },
     { href:'/agents', icon:'agents', label:'Agents' },
     { href:'/privacy', icon:'privacy', label:'x402 Privacy' },

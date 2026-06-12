@@ -180,7 +180,6 @@
       <a href="#tasks" class="sidebar-link">Tasks & Cron</a>
       <a href="#browser" class="sidebar-link">Browser</a>
       <a href="#settings" class="sidebar-link">Settings</a>
-      <a href="#mcp" class="sidebar-link" style="color:#0033ff;">Base MCP</a>
       <div class="sidebar-divider"></div>
       <div class="sidebar-title">Token</div>
       <a href="/roadmap" class="sidebar-link">Roadmap</a>
@@ -334,28 +333,6 @@ hello world
         <li><strong>Notifications</strong> — view and manage alerts</li>
       </ul>
 
-      <h2 id="mcp" style="color:#0033ff;">Base MCP Integration</h2>
-      <p>Hermes Synth integrates with <a href="https://docs.base.org/ai-agents" style="color:#0033ff;" target="_blank">Base MCP</a> (Model Context Protocol) to give your AI agents direct access to Base blockchain.</p>
-      <ul>
-        <li><strong>Send & Receive</strong> — Send ETH, USDC, or any ERC-20 to addresses, ENS names, basenames</li>
-        <li><strong>Swap Tokens</strong> — Swap via Uniswap, Aerodrome, and other DEXs on Base</li>
-        <li><strong>Sign Messages</strong> — Sign EIP-712 typed data and personal messages</li>
-        <li><strong>Contract Calls</strong> — Execute smart contract interactions with batch approvals</li>
-        <li><strong>DeFi Plugins</strong> — Morpho, Moonwell, Uniswap, Aerodrome, Virtuals, Bankr</li>
-      </ul>
-      <p>Every write action requires user approval via Base Account. Access at <a href="/mcp" style="color:#0033ff;">/mcp</a>.</p>
-      <h3>MCP API Endpoints</h3>
-      <table>
-        <tr><th>Endpoint</th><th>Method</th><th>Description</th></tr>
-        <tr><td>/api/mcp/connect</td><td>POST</td><td>Connect Base Account via MCP</td></tr>
-        <tr><td>/api/mcp/balance</td><td>GET</td><td>Get wallet balances (ETH, USDC)</td></tr>
-        <tr><td>/api/mcp/send</td><td>POST</td><td>Send tokens to address</td></tr>
-        <tr><td>/api/mcp/swap</td><td>POST</td><td>Swap tokens via DEX</td></tr>
-        <tr><td>/api/mcp/sign</td><td>POST</td><td>Sign message or typed data</td></tr>
-        <tr><td>/api/mcp/contract</td><td>POST</td><td>Execute contract call</td></tr>
-        <tr><td>/api/mcp/chat</td><td>POST</td><td>Chat with MCP agent</td></tr>
-      </table>
-
       <h2 id="api">API Reference</h2>
       <p>All API endpoints are Cloudflare Pages Functions under <span class="code-inline">/functions/</span>:</p>
       <table>
@@ -375,7 +352,6 @@ hello world
         <tr><td>/api/upload</td><td>POST</td><td>Upload file</td></tr>
         <tr><td>/api/export</td><td>GET</td><td>Export data as JSON</td></tr>
         <tr><td>/api/notifications</td><td>GET/DELETE</td><td>Manage notifications</td></tr>
-        <tr><td>/api/mcp/*</td><td>POST/GET</td><td>Base MCP operations</td></tr>
       </table>
       <p>All API endpoints (except auth) require a JWT token in the <span class="code-inline">Authorization: Bearer &lt;token&gt;</span> header.</p>
 
