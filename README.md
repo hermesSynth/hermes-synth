@@ -167,6 +167,18 @@ hermes-synth/
 
 ---
 
+## Token
+
+**$HERMES** — Contract Address (Solana)
+
+```
+6dyndsK8sKVv8NvdaxkQyVMecXu7esNa7yoVKgFJeory
+```
+
+> ⚠ Always verify the contract address. Token on Solana.
+
+---
+
 ## Contributing
 
 Contributions welcome! See [CONTRIBUTING.md](CONTRIBUTING.md).

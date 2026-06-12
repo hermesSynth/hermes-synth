@@ -125,6 +125,22 @@
     .li-text { color: var(--text-secondary); }
     .li-text.done { color: var(--text); text-decoration: line-through; text-decoration-color: var(--green); }
 
+    .ca-footer {
+      background: var(--bg-card);
+      border: 2px solid var(--accent-border);
+      border-radius: 12px;
+      padding: 24px;
+      text-align: center;
+      margin-top: 48px;
+    }
+    .ca-footer .label { color: var(--text-secondary); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; margin-bottom: 10px; }
+    .ca-footer .addr {
+      font-size: clamp(11px, 2.5vw, 15px); font-weight: 700; color: var(--accent);
+      word-break: break-all; cursor: pointer;
+    }
+    .ca-footer .warn { color: var(--red); font-size: 11px; font-weight: 600; margin-top: 10px; }
+    .ca-footer .copied { color: var(--green); font-size: 12px; margin-top: 6px; display: none; }
+
     footer {
       border-top: 1px solid var(--border);
       padding: 20px 32px;
@@ -237,7 +253,13 @@
       </div>
     </div>
 
-
+    <!-- Contract Address -->
+    <div class="ca-footer">
+      <div class="label">$HERMES — Contract Address (Solana)</div>
+      <div class="addr" onclick="navigator.clipboard.writeText('6dyndsK8sKVv8NvdaxkQyVMecXu7esNa7yoVKgFJeory');document.getElementById('copied').style.display='block';setTimeout(()=>document.getElementById('copied').style.display='none',2000);">6dyndsK8sKVv8NvdaxkQyVMecXu7esNa7yoVKgFJeory</div>
+      <div class="copied" id="copied">✓ Copied to clipboard</div>
+      <div class="warn">⚠ Always verify the contract address. Token on Solana.</div>
+    </div>
 
   </div>
 
