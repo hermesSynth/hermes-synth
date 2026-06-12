@@ -169,7 +169,7 @@ hermes-synth/
 
 ## Token
 
-**$HERMES** — Contract Address (Solana)
+**$SYNTH** — Contract Address (Solana)
 
 ```
 6dyndsK8sKVv8NvdaxkQyVMecXu7esNa7yoVKgFJeory
