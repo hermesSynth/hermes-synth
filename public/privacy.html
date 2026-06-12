@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>x402 Privacy — Hermes Synth</title>
   <link rel="icon" type="image/png" href="/logo.png?v=4">
-  <meta name="description" content="x402 Privacy — Zero-knowledge private payments for AI agents on Base Network.">
+  <meta name="description" content="x402 Privacy — Zero-knowledge private payments for AI agents on Solana.">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700;800&display=swap">
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.1/dist/ethers.umd.min.js"></script>
   <style>
@@ -291,7 +291,7 @@
       </div>
       <div class="stat">
         <div class="stat-label">Network</div>
-        <div class="stat-value green">Base</div>
+        <div class="stat-value green">Solana</div>
       </div>
       <div class="stat">
         <div class="stat-label">Your Notes</div>
@@ -349,7 +349,7 @@
         </div>
         <div class="input-group">
           <div class="input-label">Recipient Address</div>
-          <input class="input-field" id="recipientAddr" type="text" placeholder="0x... (any wallet address on Base)">
+          <input class="input-field" id="recipientAddr" type="text" placeholder="Paste recipient wallet address...">
         </div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
           Withdraw USDC to any address using your note backup. Your secret + nullifier are verified on-chain.
@@ -384,7 +384,7 @@
       <div class="card">
         <div class="card-title">Transaction History</div>
         <p style="font-size:12px; color:var(--text-dim); margin-bottom:16px; line-height:1.5;">
-          All deposits and withdrawals from the privacy pool on Base.
+          All deposits and withdrawals from the privacy pool on Solana.
         </p>
         <div id="historyList">
           <div style="text-align:center; padding:32px; color:var(--text-dim); font-size:13px;">Loading history...</div>
@@ -452,7 +452,7 @@
       </div>
       <div class="info-card">
         <h3>Agent Integration</h3>
-        <p>Use the privacy pool to shield and unshield USDC directly on Base for anonymous transactions.</p>
+        <p>Use the privacy pool to shield and unshield USDC directly on Solana for anonymous transactions.</p>
       </div>
     </div>
 
@@ -522,7 +522,7 @@
                 method: "wallet_addEthereumChain",
                 params: [{
                   chainId: "0x2105",
-                  chainName: "Base",
+                  chainName: "Solana",
                   nativeCurrency: { name: "ETH", symbol: "ETH", decimals: 18 },
                   rpcUrls: ["https://mainnet.base.org"],
                   blockExplorerUrls: ["https://basescan.org"]
@@ -664,7 +664,7 @@
         const balance = await usdc.balanceOf(userAddr);
         if (balance < amountWei) {
           const balUSDC = (Number(balance) / 1e6).toFixed(2);
-          setStatus("depositStatus", `Insufficient USDC balance. You have ${balUSDC} USDC but need ${selectedAmount} USDC. Get USDC on Base first.`, "error");
+          setStatus("depositStatus", `Insufficient USDC balance. You have ${balUSDC} USDC but need ${selectedAmount} USDC. Get USDC on Solana first.`, "error");
           btn.disabled = false;
           return;
         }
@@ -738,7 +738,7 @@
         } else if (e.reason) {
           errMsg = e.reason;
         } else if (e.message && e.message.includes("insufficient")) {
-          errMsg = "Insufficient USDC balance. Get USDC on Base first.";
+          errMsg = "Insufficient USDC balance. Get USDC on Solana first.";
         } else if (e.message && e.message.includes("user rejected")) {
           errMsg = "Transaction cancelled by user.";
         } else if (e.message && e.message.length < 200) {

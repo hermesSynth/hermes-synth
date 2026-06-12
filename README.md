@@ -13,7 +13,7 @@ Multi-model chat · Code editor · Terminal · Tasks · Cron · x402 Privacy
 [![Stars](https://img.shields.io/github/stars/hermesSynth/hermes-synth?style=for-the-badge&color=0033ff)](https://github.com/hermesSynth/hermes-synth/stargazers)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22c55e?style=for-the-badge)](LICENSE)
 [![Cloudflare](https://img.shields.io/badge/Cloudflare-Pages-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://pages.cloudflare.com)
-[![Base Network](https://img.shields.io/badge/Base-Network-0033ff?style=for-the-badge)](https://base.org)
+[![Solana](https://img.shields.io/badge/Solana-Network-9945FF?style=for-the-badge&logo=solana&logoColor=white)](https://solana.com)
 
 [**Try it now →**](https://hermessynth.org) · [Docs](https://hermessynth.org/docs) · [Roadmap](https://hermessynth.org/roadmap) · [X](https://x.com/HermesSynth)
 
@@ -85,7 +85,7 @@ npx wrangler pages dev public
 | **Database** | Cloudflare D1 (SQLite at the edge) |
 | **AI** | Venice AI · OpenAI · Anthropic · Groq — 12+ models |
 | **Auth** | JWT + bcrypt · Google OAuth · GitHub OAuth |
-| **Blockchain** | Base Network · Uniswap V3 · Privy wallet connect |
+| **Blockchain** | Solana · Wallet connect |
 | **Email** | Resend |
 
 ---
@@ -136,7 +136,7 @@ hermes-synth/
 │   │   ├── skills/         # Skills CRUD + run
 │   │   ├── terminal.js     # AI terminal
 │   │   ├── command.js      # Command center
-│   │   ├── mcp/            # Base MCP (swap, send, sign)
+│   │   ├── privacy/        # x402 Privacy (shielded payments)
 │   │   ├── cron/           # Cron jobs
 │   │   ├── browser/        # Web scraping
 │   │   ├── wallet.js       # Credits & transactions
@@ -155,7 +155,7 @@ hermes-synth/
 - [x] Platform launch (hermessynth.org)
 - [x] Multi-model support (Venice, OpenAI, Anthropic, Groq)
 - [x] Real code execution terminal (30+ languages via Wandbox)
-- [x] x402 Privacy — shielded USDC transactions on Base
+- [x] x402 Privacy — shielded USDC transactions on Solana
 - [x] Chat sessions with markdown, streaming, search, pin, export
 - [ ] Token launch on Solana — coming soon
 - [ ] Agent marketplace
